@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { safeInternalPath } from "@/lib/safe-redirect";
+import { useLocale } from "@/lib/use-locale";
+import { t } from "@/lib/locale";
 
 function getSafeNextPath() {
   return safeInternalPath(new URLSearchParams(window.location.search).get("next"), window.location.origin);
@@ -12,6 +14,7 @@ function getSafeNextPath() {
 
 export default function LoginPage() {
   const router = useRouter();
+  const locale = useLocale();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,12 +26,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("message") === "confirmation_failed") {
-      setMessage("邮箱确认链接暂时无法使用，请重新注册或登录。");
+      setMessage(t(locale,"邮箱确认链接暂时无法使用，请重新注册或登录。","This confirmation link is no longer valid. Please sign up again or log in."));
     }
   }, []);
 
   async function resendConfirmation() {
-    if (!email.trim()) { setError("请先填写注册邮箱。"); return; }
+    if (!email.trim()) { setError(t(locale,"请先填写注册邮箱。","Enter the email address you used to sign up.")); return; }
     setResending(true); setError(""); setMessage("");
     try {
       const supabase = createClient();
@@ -38,9 +41,9 @@ export default function LoginPage() {
         type: "signup", email: email.trim(), options: { emailRedirectTo: callback },
       });
       if (resendError) throw resendError;
-      setMessage("确认邮件已重新发送，请检查邮箱收件箱和垃圾邮件。");
+      setMessage(t(locale,"确认邮件已重新发送，请检查邮箱收件箱和垃圾邮件。","A new confirmation email has been sent. Check your inbox and spam folder."));
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "邮件发送失败，请稍后重试。");
+      setError(caught instanceof Error ? caught.message : t(locale,"邮件发送失败，请稍后重试。","Could not send the email. Please try again."));
     } finally { setResending(false); }
   }
 
@@ -58,7 +61,7 @@ export default function LoginPage() {
           options: { data: { display_name: displayName.trim() || "New Friend" }, emailRedirectTo: callback },
         });
         if (signUpError) throw signUpError;
-        if (!data.session) setMessage("注册成功！请检查邮箱，点击确认链接后即可进入 Sonder。");
+        if (!data.session) setMessage(t(locale,"注册成功！请检查邮箱，点击确认链接后即可进入 Sonder。","You’re signed up! Check your email and follow the confirmation link to enter Sonder."));
         else { router.push(nextPath); router.refresh(); }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
@@ -66,7 +69,7 @@ export default function LoginPage() {
         router.push(nextPath); router.refresh();
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "操作失败，请稍后重试。");
+      setError(caught instanceof Error ? caught.message : t(locale,"操作失败，请稍后重试。","Something went wrong. Please try again."));
     } finally { setBusy(false); }
   }
 
@@ -76,23 +79,23 @@ export default function LoginPage() {
       <section className="auth-card">
         <Link href="/" className="auth-logo">sonder<span>.</span></Link>
         <p className="eyebrow">✳ YOUR OWN LITTLE CORNER</p>
-        <h1>{mode === "login" ? "欢迎回来。" : "从这里开始。"}</h1>
-        <p className="auth-intro">{mode === "login" ? "回到你的日常收藏簿，继续记录那些值得记住的瞬间。" : "创建一个属于自己的小小空间，慢慢收藏生活。"}</p>
-        <div className="auth-tabs" role="tablist" aria-label="登录或注册">
-          <button type="button" className={mode === "login" ? "selected" : ""} onClick={() => {setMode("login");setError("");setMessage("");}}>登录</button>
-          <button type="button" className={mode === "signup" ? "selected" : ""} onClick={() => {setMode("signup");setError("");setMessage("");}}>注册</button>
+        <h1>{mode === "login" ? t(locale,"欢迎回来。","Welcome back.") : t(locale,"从这里开始。","A little space of your own.")}</h1>
+        <p className="auth-intro">{mode === "login" ? t(locale,"回到你的日常收藏簿，继续记录那些值得记住的瞬间。","Return to your little archive and keep the moments worth remembering.") : t(locale,"创建一个属于自己的小小空间，慢慢收藏生活。","Create a little corner of your own and collect life as it happens.")}</p>
+        <div className="auth-tabs" role="tablist" aria-label={t(locale,"登录或注册","Log in or sign up")}>
+          <button type="button" className={mode === "login" ? "selected" : ""} onClick={() => {setMode("login");setError("");setMessage("");}}>{t(locale,"登录","Log in")}</button>
+          <button type="button" className={mode === "signup" ? "selected" : ""} onClick={() => {setMode("signup");setError("");setMessage("");}}>{t(locale,"注册","Sign up")}</button>
         </div>
         <form onSubmit={handleSubmit} className="auth-form">
-          {mode === "signup" && <label><span>怎么称呼你</span><input value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="你的昵称" maxLength={40}/></label>}
-          <label><span>邮箱地址</span><input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label>
-          <label><span>密码</span><input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={6} required value={password} onChange={e=>setPassword(e.target.value)} placeholder="至少 6 位"/></label>
+          {mode === "signup" && <label><span>{t(locale,"怎么称呼你","What should we call you?")}</span><input value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder={t(locale,"你的昵称","Your name")} maxLength={40}/></label>}
+          <label><span>{t(locale,"邮箱地址","Email address")}</span><input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label>
+          <label><span>{t(locale,"密码","Password")}</span><input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={6} required value={password} onChange={e=>setPassword(e.target.value)} placeholder={t(locale,"至少 6 位","At least 6 characters")}/></label>
           {error && <p className="form-error" role="alert">{error}</p>}
-          {error.toLowerCase().includes("email not confirmed") && <button className="auth-submit" type="button" onClick={resendConfirmation} disabled={resending}>{resending ? "正在发送…" : "重新发送确认邮件"}</button>}
+          {error.toLowerCase().includes("email not confirmed") && <button className="auth-submit" type="button" onClick={resendConfirmation} disabled={resending}>{resending ? t(locale,"正在发送…","Sending…") : t(locale,"重新发送确认邮件","Resend confirmation email")}</button>}
           {message && <p className="form-success" role="status">{message}</p>}
-          <button className="auth-submit" type="submit" disabled={busy}>{busy?"请稍候…":mode==="login"?"进入我的日记 ↗":"创建我的账户 ↗"}</button>
+          <button className="auth-submit" type="submit" disabled={busy}>{busy?t(locale,"请稍候…","Please wait…"):mode==="login"?t(locale,"进入我的日记 ↗","Open my journal ↗"):t(locale,"创建我的账户 ↗","Create my account ↗")}</button>
         </form>
-        <p className="auth-footnote">你的日记属于你。每篇记录都可以单独设置可见范围。</p>
-        <Link href="/" className="back-home">← 返回首页</Link>
+        <p className="auth-footnote">{t(locale,"你的日记属于你。每篇记录都可以单独设置可见范围。","Your journal belongs to you. Every entry has its own visibility settings.")}</p>
+        <Link href="/" className="back-home">{t(locale,"← 返回首页","← Back home")}</Link>
       </section>
     </main>
   );
