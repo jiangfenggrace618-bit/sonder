@@ -28,10 +28,10 @@ export default function EditJournalPage(){
     async function load(){
       const supabase=createClient();
       const {data:{user}}=await supabase.auth.getUser();
-      if(!user){router.replace("/login");return;}
+      if(!user){router.replace(`/login?next=${encodeURIComponent(`/journal/${id}/edit`)}`);return;}
       const {data:post,error:postError}=await supabase.from("posts").select("id,title,content,visibility,mood,location").eq("id",id).eq("user_id",user.id).single();
       if(postError)throw postError;
-      const {data:photoRows,error:photoError}=await supabase.from("post_photos").select("id,image_url,caption,sort_order").eq("post_id",id).order("sort_order");
+      const {data:photoRows,error:photoError}=await supabase.from("post_photos").select("id,image_url,caption,sort_order").eq("post_id",id).eq("user_id",user.id).order("sort_order");
       if(photoError)throw photoError;
       const photoList=await Promise.all((photoRows??[]).map(async photo=>{
         const {data}=await supabase.storage.from("post-photos").createSignedUrl(photo.image_url,3600);
