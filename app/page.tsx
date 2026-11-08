@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/use-locale";
 
 type Language = "zh" | "en";
 
@@ -52,18 +52,7 @@ const copy = {
 };
 
 export default function Home() {
-  const [language, setLanguage] = useState<Language>("zh");
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("sonder-language");
-    if (saved === "zh" || saved === "en") setLanguage(saved);
-  }, []);
-
-  function changeLanguage(next: Language) {
-    setLanguage(next);
-    window.localStorage.setItem("sonder-language", next);
-  }
-
+  const language = useLocale();
   const t = copy[language];
 
   return (
@@ -73,11 +62,6 @@ export default function Home() {
         <a className="logo" href="#">sonder<span>.</span></a>
         <nav><a href="/explore">{t.journal}</a><a href="#about">{t.about}</a><a href="/guestbook">{t.guestbook}</a></nav>
         <div className="nav-actions">
-          <div className="language-toggle" aria-label="选择语言 / Choose language">
-            <button className={language === "zh" ? "active" : ""} onClick={() => changeLanguage("zh")} aria-pressed={language === "zh"}>中文</button>
-            <span>/</span>
-            <button className={language === "en" ? "active" : ""} onClick={() => changeLanguage("en")} aria-pressed={language === "en"}>EN</button>
-          </div>
           <a className="note" href="/login">{language === "zh" ? "进入日记 ↗" : "MY JOURNAL ↗"}</a>
         </div>
       </header>
