@@ -5,12 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import ExportBackupButton from "@/components/export-backup-button";
+import { useLocale } from "@/lib/use-locale";
+import { t } from "@/lib/locale";
 
 const themes=["vintage-paper","linen","sage","rose","night","floral","custom"];
 const accepted=["image/jpeg","image/png","image/webp","image/gif","image/heic","image/heif"];
 
 export default function ProfileSettingsPage() {
   const router=useRouter();
+  const locale=useLocale();
   const [userId,setUserId]=useState("");
   const [username,setUsername]=useState("");
   const [displayName,setDisplayName]=useState("");
@@ -43,21 +46,21 @@ export default function ProfileSettingsPage() {
       if(profile.background_url){const {data}=await supabase.storage.from("profile-media").createSignedUrl(profile.background_url,3600);if(alive)setBackgroundPreview(data?.signedUrl||"");}
       if(alive)setLoading(false);
     }
-    load().catch(e=>{if(alive){setError(e instanceof Error?e.message:"读取个人资料失败");setLoading(false);}});
+    load().catch(e=>{if(alive){setError(e instanceof Error?e.message:t(locale,t(locale,"读取个人资料失败","Could not load your profile"),"Could not load your profile"));setLoading(false);}});
     return ()=>{alive=false;};
   },[router]);
 
   function pick(file:File|null,kind:"avatar"|"background"){
     if(!file)return;
-    if(!accepted.includes(file.type)||file.size>10*1024*1024){setError("请选择 JPG、PNG、WEBP、GIF 或 HEIC 图片，单张不超过 10MB。");return;}
+    if(!accepted.includes(file.type)||file.size>10*1024*1024){setError(t(locale,"请选择 JPG、PNG、WEBP、GIF 或 HEIC 图片，单张不超过 10MB。","Choose a JPG, PNG, WEBP, GIF or HEIC image up to 10 MB."));return;}
     setError("");const url=URL.createObjectURL(file);
     if(kind==="avatar"){setAvatarFile(file);setAvatarPreview(url);}else{setBackgroundFile(file);setBackgroundPreview(url);setTheme("custom");}
   }
 
   async function save(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
-    if(!/^[a-z0-9_]{3,24}$/.test(username)){setError("用户名需为 3–24 位小写字母、数字或下划线。");return;}
-    if(!displayName.trim()){setError("请填写显示名称。");return;}
+    if(!/^[a-z0-9_]{3,24}$/.test(username)){setError(t(locale,"用户名需为 3–24 位小写字母、数字或下划线。","Username must be 3–24 lowercase letters, numbers or underscores."));return;}
+    if(!displayName.trim()){setError(t(locale,"请填写显示名称。","Please enter a display name."));return;}
     setBusy(true);setError("");setSuccess("");
     const supabase=createClient();const uploaded:string[]=[];
     try{
@@ -77,28 +80,28 @@ export default function ProfileSettingsPage() {
       }).eq("id",userId);
       if(updateError)throw updateError;
       setAvatarPath(nextAvatar);setBackgroundPath(nextBackground);setAvatarFile(null);setBackgroundFile(null);
-      setSuccess("个人主页已保存。");router.refresh();
+      setSuccess(t(locale,"个人主页已保存。","Your profile has been saved."));router.refresh();
     }catch(caught){
       if(uploaded.length)await supabase.storage.from("profile-media").remove(uploaded);
-      setError(caught instanceof Error?caught.message:"保存失败，请稍后重试。");
+      setError(caught instanceof Error?caught.message:t(locale,"保存失败，请稍后重试。","Could not save. Please try again."));
     }finally{setBusy(false);}
   }
 
-  const themeNames:Record<string,string>={"vintage-paper":"复古纸张","linen":"亚麻","sage":"鼠尾草绿","rose":"复古玫瑰","night":"夜色","floral":"花卉","custom":"自定义背景"};
+  const themeNames:Record<string,string>={"vintage-paper":t(locale,"复古纸张","Vintage paper"),"linen":t(locale,"亚麻","Linen"),"sage":t(locale,"鼠尾草绿","Sage"),"rose":t(locale,"复古玫瑰","Vintage rose"),"night":t(locale,"夜色","Night"),"floral":t(locale,"花卉","Floral"),"custom":t(locale,"自定义背景","Custom background")};
   return <main className="journal-page">
-    <header className="journal-header"><Link href="/" className="auth-logo">sonder<span>.</span></Link><Link href="/journal" className="journal-quiet-link">← 返回我的日记</Link></header>
+    <header className="journal-header"><Link href="/" className="auth-logo">sonder<span>.</span></Link><Link href="/journal" className="journal-quiet-link">{t(locale,"← 返回我的日记","← Back to my journal")}</Link></header>
     <section className="profile-settings">
-      <p className="eyebrow">✳ MAKE THIS SPACE YOURS</p><h1>装点你的小天地。</h1><p className="editor-intro">选择一个名字、写一点介绍，再挑选喜欢的背景。</p>
-      {loading?<p>正在读取个人资料…</p>:<form className="profile-settings-form" onSubmit={save}>
-        <label>用户名<input value={username} onChange={e=>setUsername(e.target.value.toLowerCase())} maxLength={24}/><small>个人主页地址：/u/{username||"your-name"}</small></label>
-        <label>显示名称<input value={displayName} onChange={e=>setDisplayName(e.target.value)} maxLength={40}/></label>
-        <label>个人介绍<textarea value={bio} onChange={e=>setBio(e.target.value)} maxLength={300} placeholder="写一点关于自己的话…"/></label>
-        <label>头像<input type="file" accept="image/*" onChange={e=>pick(e.target.files?.[0]||null,"avatar")}/>{avatarPreview&&<img className="profile-image-preview" src={avatarPreview} alt="头像预览"/>}</label>
-        <label>主页背景<input type="file" accept="image/*" onChange={e=>pick(e.target.files?.[0]||null,"background")}/>{backgroundPreview&&<img className="profile-background-preview" src={backgroundPreview} alt="背景预览"/>}</label>
-        <label>背景风格<select value={theme} onChange={e=>setTheme(e.target.value)}>{themes.map(value=><option key={value} value={value}>{themeNames[value]}</option>)}</select></label>
+      <p className="eyebrow">✳ MAKE THIS SPACE YOURS</p><h1>{t(locale,"装点你的小天地。","Make this space yours.")}</h1><p className="editor-intro">{t(locale,"选择一个名字、写一点介绍，再挑选喜欢的背景。","Choose a name, write a little introduction, and pick a background you love.")}</p>
+      {loading?<p>{t(locale,"正在读取个人资料…","Loading your profile…")}</p>:<form className="profile-settings-form" onSubmit={save}>
+        <label>{t(locale,"用户名","Username")}<input value={username} onChange={e=>setUsername(e.target.value.toLowerCase())} maxLength={24}/><small>{t(locale,"个人主页地址：","Profile address: ")} /u/{username||"your-name"}</small></label>
+        <label>{t(locale,"显示名称","Display name")}<input value={displayName} onChange={e=>setDisplayName(e.target.value)} maxLength={40}/></label>
+        <label>{t(locale,"个人介绍","Bio")}<textarea value={bio} onChange={e=>setBio(e.target.value)} maxLength={300} placeholder={t(locale,"写一点关于自己的话…","A few words about you…")}/></label>
+        <label>{t(locale,"头像","Avatar")}<input type="file" accept="image/*" onChange={e=>pick(e.target.files?.[0]||null,"avatar")}/>{avatarPreview&&<img className="profile-image-preview" src={avatarPreview} alt={t(locale,"头像预览","Avatar preview")}/>}</label>
+        <label>{t(locale,"主页背景","Profile background")}<input type="file" accept="image/*" onChange={e=>pick(e.target.files?.[0]||null,"background")}/>{backgroundPreview&&<img className="profile-background-preview" src={backgroundPreview} alt={t(locale,"背景预览","Background preview")}/>}</label>
+        <label>{t(locale,"背景风格","Background style")}<select value={theme} onChange={e=>setTheme(e.target.value)}>{themes.map(value=><option key={value} value={value}>{themeNames[value]}</option>)}</select></label>
         {error&&<p className="form-error">{error}</p>}{success&&<p className="form-success">{success}</p>}
-        <div className="editor-actions"><Link href="/journal" className="journal-quiet-link">取消</Link><button className="journal-primary-button" disabled={busy}>{busy?"正在保存…":"保存主页 ↗"}</button></div>
-        {username&&<Link href={"/u/"+username} className="journal-text-link">预览我的主页 ↗</Link>}
+        <div className="editor-actions"><Link href="/journal" className="journal-quiet-link">{t(locale,"取消","Cancel")}</Link><button className="journal-primary-button" disabled={busy}>{busy?t(locale,"正在保存…","Saving…"):t(locale,"保存主页 ↗","Save profile ↗")}</button></div>
+        {username&&<Link href={"/u/"+username} className="journal-text-link">{t(locale,"预览我的主页 ↗","Preview my profile ↗")}</Link>}
       </form>}
       {!loading&&userId&&<ExportBackupButton userId={userId}/>}
     </section>
