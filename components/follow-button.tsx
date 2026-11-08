@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 export default function FollowButton({targetUserId,viewerId,initialFollowing}:{targetUserId:string;viewerId:string|null;initialFollowing:boolean}) {
+  const pathname=usePathname();
   const [following,setFollowing]=useState(initialFollowing);
   const [busy,setBusy]=useState(false);
-  if(!viewerId)return <Link className="follow-button" href="/login">登录后关注</Link>;
+  if(!viewerId)return <Link className="follow-button" href={`/login?next=${encodeURIComponent(pathname||"/explore")}`}>登录后关注</Link>;
   if(viewerId===targetUserId)return null;
   async function toggle() {
     setBusy(true);
