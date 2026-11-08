@@ -1,0 +1,87 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+
+const MAX_SIZE=10*1024*1024;
+const ACCEPTED=["image/jpeg","image/png","image/webp","image/gif","image/heic","image/heif"];
+
+export default function NewJournalPage() {
+  const router=useRouter();
+  const [title,setTitle]=useState("");
+  const [content,setContent]=useState("");
+  const [visibility,setVisibility]=useState<"public"|"followers"|"private">("private");
+  const [mood,setMood]=useState("");
+  const [location,setLocation]=useState("");
+  const [files,setFiles]=useState<File[]>([]);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState("");
+
+  function chooseFiles(list:FileList|null) {
+    if(!list)return;
+    const selected=Array.from(list);
+    if(selected.length>8){setError("一次最多上传 8 张照片。");return;}
+    if(selected.some(file=>!ACCEPTED.includes(file.type)||file.size>MAX_SIZE)){setError("照片需为 JPG、PNG、WEBP、GIF 或 HEIC 格式，且单张不超过 10MB。");return;}
+    setError("");setFiles(selected);
+  }
+
+  async function handleSubmit(event:FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if(!title.trim()){setError("先为这篇日记写一个标题吧。");return;}
+    setBusy(true);setError("");
+    const supabase=createClient();
+    const uploaded:string[]=[];
+    let postId:string|null=null;
+    try {
+      const {data:{user},error:authError}=await supabase.auth.getUser();
+      if(authError||!user){router.push("/login?next=/journal/new");return;}
+      const {data:post,error:postError}=await supabase.from("posts").insert({
+        user_id:user.id,title:title.trim(),content:content.trim(),visibility,
+        mood:mood.trim()||null,location:location.trim()||null,
+      }).select("id").single();
+      if(postError)throw postError;
+      postId=post.id;
+      const photoRows=[];
+      for(const [index,file] of files.entries()){
+        const ext=file.name.includes(".")?file.name.split(".").pop()!.toLowerCase():(file.type.split("/")[1]||"jpg");
+        const path=`${user.id}/${post.id}/${crypto.randomUUID()}.${ext}`;
+        const {error:uploadError}=await supabase.storage.from("post-photos").upload(path,file,{contentType:file.type,upsert:false});
+        if(uploadError)throw uploadError;
+        uploaded.push(path);
+        photoRows.push({post_id:post.id,user_id:user.id,image_url:path,caption:"",sort_order:index});
+      }
+      if(photoRows.length){const {error:photoError}=await supabase.from("post_photos").insert(photoRows);if(photoError)throw photoError;}
+      router.push("/journal");router.refresh();
+    } catch(caught) {
+      if(uploaded.length)await supabase.storage.from("post-photos").remove(uploaded);
+      if(postId){await supabase.from("post_photos").delete().eq("post_id",postId);await supabase.from("posts").delete().eq("id",postId);}
+      setError(caught instanceof Error?caught.message:"保存失败，请稍后重试。");
+    } finally {setBusy(false);}
+  }
+
+  return <main className="journal-page">
+    <header className="journal-header"><Link href="/" className="auth-logo">sonder<span>.</span></Link><Link href="/journal" className="journal-quiet-link">← 返回我的日记</Link></header>
+    <section className="editor-content">
+      <p className="eyebrow">✳ A MOMENT TO KEEP</p><h1>写下这一刻。</h1><p className="editor-intro">不必写得多么精彩，只要它值得被你记住。</p>
+      <form className="journal-form" onSubmit={handleSubmit}>
+        <label><span>标题 <i>必填</i></span><input value={title} onChange={e=>setTitle(e.target.value)} maxLength={120} required placeholder="给今天起一个名字…"/></label>
+        <label><span>记录一点什么</span><textarea value={content} onChange={e=>setContent(e.target.value)} rows={8} placeholder="今天发生了什么？有什么想留住的念头？"/></label>
+        <div className="journal-form-two">
+          <label><span>此刻的心情</span><input value={mood} onChange={e=>setMood(e.target.value)} maxLength={40} placeholder="例如：平静、开心…"/></label>
+          <label><span>所在的地方</span><input value={location} onChange={e=>setLocation(e.target.value)} maxLength={100} placeholder="例如：家附近的咖啡馆"/></label>
+        </div>
+        <label><span>照片 <i>最多 8 张 · 单张不超过 10MB</i></span><input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" multiple onChange={e=>chooseFiles(e.target.files)}/></label>
+        {files.length>0&&<div className="upload-preview-grid">{files.map(file=><figure key={file.name+file.lastModified}><span>{file.name}</span><figcaption>{(file.size/1024/1024).toFixed(1)} MB</figcaption></figure>)}</div>}
+        <fieldset className="visibility-field"><legend>谁可以看见这篇日记？</legend>
+          <label className={visibility==="public"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="public"} onChange={()=>setVisibility("public")}/><span><b>公开</b><small>所有人都可以看见</small></span></label>
+          <label className={visibility==="followers"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="followers"} onChange={()=>setVisibility("followers")}/><span><b>仅好友</b><small>关注你的人可以看见</small></span></label>
+          <label className={visibility==="private"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="private"} onChange={()=>setVisibility("private")}/><span><b>仅自己</b><small>只有你自己可以看见</small></span></label>
+        </fieldset>
+        {error&&<p className="form-error" role="alert">{error}</p>}
+        <div className="editor-actions"><Link href="/journal" className="journal-quiet-link">暂不保存</Link><button type="submit" className="journal-primary-button" disabled={busy}>{busy?"正在收藏…":"收藏这篇日记 ↗"}</button></div>
+      </form>
+    </section>
+  </main>;
+}

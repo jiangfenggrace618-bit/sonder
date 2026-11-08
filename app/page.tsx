@@ -78,7 +78,7 @@ export default function Home() {
             <span>/</span>
             <button className={language === "en" ? "active" : ""} onClick={() => changeLanguage("en")} aria-pressed={language === "en"}>EN</button>
           </div>
-          <a className="note" href="#guestbook">{t.leaveNote}</a>
+          <a className="note" href="/login">{language === "zh" ? "进入日记 ↗" : "MY JOURNAL ↗"}</a>
         </div>
       </header>
       <section className="hero wrap">
