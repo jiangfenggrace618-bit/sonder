@@ -5,7 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-function getSafeNextPath() {\n  const candidate = new URLSearchParams(window.location.search).get("next");\n  return candidate && candidate.startsWith("/") && !candidate.startsWith("//") ? candidate : "/journal";\n}\n\nexport default function LoginPage() {
+function getSafeNextPath() {
+  const candidate = new URLSearchParams(window.location.search).get("next");
+  return candidate && candidate.startsWith("/") && !candidate.startsWith("//") ? candidate : "/journal";
+}
+
+export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -14,37 +19,29 @@ function getSafeNextPath() {\n  const candidate = new URLSearchParams(window.loc
   const [busy, setBusy] = useState(false);
   const [resending, setResending] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("message") === "confirmation_failed") {
       setMessage("邮箱确认链接暂时无法使用，请重新注册或登录。");
     }
   }, []);
-  const [error, setError] = useState("");
 
   async function resendConfirmation() {
-    if (!email.trim()) {
-      setError("请先填写注册邮箱。");
-      return;
-    }
-    setResending(true);
-    setError("");
-    setMessage("");
+    if (!email.trim()) { setError("请先填写注册邮箱。"); return; }
+    setResending(true); setError(""); setMessage("");
     try {
       const supabase = createClient();
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const callback = new URL(`/auth/callback?next=${encodeURIComponent(getSafeNextPath())}`, siteUrl).toString();
       const { error: resendError } = await supabase.auth.resend({
-        type: "signup",
-        email: email.trim(),
-        options: { emailRedirectTo: new URL(`/auth/callback?next=${encodeURIComponent(getSafeNextPath())}`, siteUrl).toString() },
+        type: "signup", email: email.trim(), options: { emailRedirectTo: callback },
       });
       if (resendError) throw resendError;
       setMessage("确认邮件已重新发送，请检查邮箱收件箱和垃圾邮件。");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "邮件发送失败，请稍后重试。");
-    } finally {
-      setResending(false);
-    }
+    } finally { setResending(false); }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -52,16 +49,13 @@ function getSafeNextPath() {\n  const candidate = new URLSearchParams(window.loc
     setBusy(true); setError(""); setMessage("");
     try {
       const supabase = createClient();
+      const nextPath = getSafeNextPath();
       if (mode === "signup") {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+        const callback = new URL(`/auth/callback?next=${encodeURIComponent(nextPath)}`, siteUrl).toString();
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(), password,
-          options: {
-            data: { display_name: displayName.trim() || "New Friend" },
-            emailRedirectTo: new URL(
-              "/auth/callback",
-              process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
-            ).toString(),
-          },
+          options: { data: { display_name: displayName.trim() || "New Friend" }, emailRedirectTo: callback },
         });
         if (signUpError) throw signUpError;
         if (!data.session) setMessage("注册成功！请检查邮箱，点击确认链接后即可进入 Sonder。");
@@ -93,11 +87,7 @@ function getSafeNextPath() {\n  const candidate = new URLSearchParams(window.loc
           <label><span>邮箱地址</span><input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label>
           <label><span>密码</span><input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={6} required value={password} onChange={e=>setPassword(e.target.value)} placeholder="至少 6 位"/></label>
           {error && <p className="form-error" role="alert">{error}</p>}
-          {error.toLowerCase().includes("email not confirmed") && (
-            <button className="auth-submit" type="button" onClick={resendConfirmation} disabled={resending}>
-              {resending ? "正在发送…" : "重新发送确认邮件"}
-            </button>
-          )}
+          {error.toLowerCase().includes("email not confirmed") && <button className="auth-submit" type="button" onClick={resendConfirmation} disabled={resending}>{resending ? "正在发送…" : "重新发送确认邮件"}</button>}
           {message && <p className="form-success" role="status">{message}</p>}
           <button className="auth-submit" type="submit" disabled={busy}>{busy?"请稍候…":mode==="login"?"进入我的日记 ↗":"创建我的账户 ↗"}</button>
         </form>
