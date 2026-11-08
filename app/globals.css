@@ -156,3 +156,8 @@
 .backup-panel small{display:block;margin-top:8px;font:10px/1.7 var(--mono);color:#898373}
 .backup-panel .journal-primary-button{justify-self:start}
 @media(max-width:650px){.backup-panel{padding:18px}}
+
+.global-language-toggle{position:fixed;right:22px;bottom:22px;z-index:1000;display:flex;align-items:center;gap:8px;padding:9px 12px;background:#faf8f2eF;border:1px solid var(--line);box-shadow:0 5px 18px #29282012;font:10px var(--mono);color:#898373;backdrop-filter:blur(8px)}
+.global-language-toggle button{border:0;background:transparent;padding:0;color:#898373;cursor:pointer;font:inherit}
+.global-language-toggle button.active{color:var(--ink);font-weight:600}
+@media(max-width:650px){.global-language-toggle{right:14px;bottom:14px}}
