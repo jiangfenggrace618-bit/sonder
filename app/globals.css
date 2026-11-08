@@ -161,3 +161,6 @@
 .global-language-toggle button{border:0;background:transparent;padding:0;color:#898373;cursor:pointer;font:inherit}
 .global-language-toggle button.active{color:var(--ink);font-weight:600}
 @media(max-width:650px){.global-language-toggle{right:14px;bottom:14px}}
+
+.auth-text-button{justify-self:end;border:0;background:transparent;padding:4px 0;color:#817965;text-decoration:underline;text-underline-offset:3px;font:11px var(--mono);cursor:pointer}
+.auth-text-button:disabled{opacity:.55;cursor:wait}
