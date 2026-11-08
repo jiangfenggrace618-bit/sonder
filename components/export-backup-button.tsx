@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useLocale } from "@/lib/use-locale";
+import { t } from "@/lib/locale";
 
 type PhotoRow = {
   id: string;
@@ -17,7 +19,7 @@ async function fileAsDataUrl(
   path: string,
 ) {
   const { data, error } = await supabase.storage.from(bucket).download(path);
-  if (error) throw new Error(`备份图片失败（${path}）：${error.message}`);
+  if (error) throw new Error(locale==="en"?`Could not back up image (${path}): ${error.message}`:`备份图片失败（${path}）：${error.message}`);
 
   const bytes = new Uint8Array(await data.arrayBuffer());
   let binary = "";
@@ -36,20 +38,21 @@ async function fileAsDataUrl(
 }
 
 export default function ExportBackupButton({ userId }: { userId: string }) {
+  const locale = useLocale();
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
 
   async function exportBackup() {
     setBusy(true);
-    setStatus("正在整理你的日记…");
+    setStatus(t(locale,"正在整理你的日记…","Preparing your archive…"));
     setError("");
 
     try {
       const supabase = createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user || user.id !== userId) {
-        throw new Error("登录状态已失效，请重新登录后再备份。");
+        throw new Error(t(locale,"登录状态已失效，请重新登录后再备份。","Your session expired. Please log in again before exporting."));
       }
 
       const [
@@ -84,7 +87,7 @@ export default function ExportBackupButton({ userId }: { userId: string }) {
 
       async function addFile(bucket: "post-photos" | "profile-media", path: string) {
         completedFiles += 1;
-        setStatus(`正在备份照片和主页图片（${completedFiles}/${totalFiles}）…`);
+        setStatus(locale==="en"?`Backing up photos and profile images (${completedFiles}/${totalFiles})…`:`正在备份照片和主页图片（${completedFiles}/${totalFiles}）…`);
         files.push(await fileAsDataUrl(supabase, bucket, path));
       }
 
@@ -120,7 +123,7 @@ export default function ExportBackupButton({ userId }: { userId: string }) {
         files,
       };
 
-      setStatus("正在生成备份文件…");
+      setStatus(t(locale,"正在生成备份文件…","Creating your backup file…"));
       const blob = new Blob([JSON.stringify(backup, null, 2)], {
         type: "application/json;charset=utf-8",
       });
@@ -132,10 +135,10 @@ export default function ExportBackupButton({ userId }: { userId: string }) {
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-      setStatus("备份已下载到你的设备。请妥善保存文件。");
+      setStatus(t(locale,"备份已下载到你的设备。请妥善保存文件。","Your backup has been downloaded. Keep the file somewhere safe."));
     } catch (caught) {
       setStatus("");
-      setError(caught instanceof Error ? caught.message : "备份失败，请稍后重试。");
+      setError(caught instanceof Error ? caught.message : t(locale,"备份失败，请稍后重试。","Backup failed. Please try again."));
     } finally {
       setBusy(false);
     }
@@ -144,12 +147,12 @@ export default function ExportBackupButton({ userId }: { userId: string }) {
   return (
     <section className="backup-panel">
       <div>
-        <h2>带走你的收藏。</h2>
-        <p>导出个人资料、日记、照片、关注关系和留言，生成一份保存在本地的 JSON 备份。</p>
-        <small>备份文件可能较大；请妥善保存，不要公开分享。</small>
+        <h2>{t(locale,"带走你的收藏。","Take your archive with you.")}</h2>
+        <p>{t(locale,"导出个人资料、日记、照片、关注关系和留言，生成一份保存在本地的 JSON 备份。","Export your profile, journal entries, photos, follows and guestbook notes into a JSON backup saved on your device.")}</p>
+        <small>{t(locale,"备份文件可能较大；请妥善保存，不要公开分享。","The backup may be large. Store it safely and do not share it publicly.")}</small>
       </div>
       <button type="button" className="journal-primary-button" onClick={exportBackup} disabled={busy || !userId}>
-        {busy ? "正在备份…" : "导出我的数据 ↗"}
+        {busy ? t(locale,"正在备份…","Exporting…") : t(locale,"导出我的数据 ↗","Export my data ↗")}
       </button>
       {status && <p className="form-success" role="status" aria-live="polite">{status}</p>}
       {error && <p className="form-error" role="alert">{error}</p>}
