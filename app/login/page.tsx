@@ -28,7 +28,7 @@ export default function LoginPage() {
     if (new URLSearchParams(window.location.search).get("message") === "confirmation_failed") {
       setMessage(t(locale,"邮箱确认链接暂时无法使用，请重新注册或登录。","This confirmation link is no longer valid. Please sign up again or log in."));
     }
-  }, []);
+  }, [locale]);
 
   async function resendConfirmation() {
     if (!email.trim()) { setError(t(locale,"请先填写注册邮箱。","Enter the email address you used to sign up.")); return; }
