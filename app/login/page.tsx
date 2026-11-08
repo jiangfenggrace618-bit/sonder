@@ -4,10 +4,10 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { safeInternalPath } from "@/lib/safe-redirect";
 
 function getSafeNextPath() {
-  const candidate = new URLSearchParams(window.location.search).get("next");
-  return candidate && candidate.startsWith("/") && !candidate.startsWith("//") ? candidate : "/journal";
+  return safeInternalPath(new URLSearchParams(window.location.search).get("next"), window.location.origin);
 }
 
 export default function LoginPage() {
