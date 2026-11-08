@@ -58,7 +58,7 @@ export default async function JournalDetailPage({
 
   const visibilityLabel: Record<string, string> = {
     public: t(locale,"公开","Public"),
-    followers: t(locale,"仅好友","Friends"),
+    followers: t(locale,"关注者可见","Followers"),
     private: t(locale,"仅自己","Private"),
   };
 
