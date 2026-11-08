@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +16,13 @@ export default function NewJournalPage() {
   const [mood,setMood]=useState("");
   const [location,setLocation]=useState("");
   const [files,setFiles]=useState<File[]>([]);
+  const [previews,setPreviews]=useState<string[]>([]);
+
+  useEffect(()=>{
+    const urls=files.map(file=>URL.createObjectURL(file));
+    setPreviews(urls);
+    return ()=>urls.forEach(url=>URL.revokeObjectURL(url));
+  },[files]);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
 
@@ -73,7 +80,7 @@ export default function NewJournalPage() {
           <label><span>所在的地方</span><input value={location} onChange={e=>setLocation(e.target.value)} maxLength={100} placeholder="例如：家附近的咖啡馆"/></label>
         </div>
         <label><span>照片 <i>最多 8 张 · 单张不超过 10MB</i></span><input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" multiple onChange={e=>chooseFiles(e.target.files)}/></label>
-        {files.length>0&&<div className="upload-preview-grid">{files.map(file=><figure key={file.name+file.lastModified}><span>{file.name}</span><figcaption>{(file.size/1024/1024).toFixed(1)} MB</figcaption></figure>)}</div>}
+        {files.length>0&&<div className="upload-preview-grid">{files.map((file,index)=><figure key={file.name+file.lastModified}>{previews[index]&&<img src={previews[index]} alt={file.name}/>}<figcaption>{file.name} · {(file.size/1024/1024).toFixed(1)} MB</figcaption></figure>)}</div>}
         <fieldset className="visibility-field"><legend>谁可以看见这篇日记？</legend>
           <label className={visibility==="public"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="public"} onChange={()=>setVisibility("public")}/><span><b>公开</b><small>所有人都可以看见</small></span></label>
           <label className={visibility==="followers"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="followers"} onChange={()=>setVisibility("followers")}/><span><b>仅好友</b><small>关注你的人可以看见</small></span></label>
