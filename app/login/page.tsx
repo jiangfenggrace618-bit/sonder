@@ -29,7 +29,13 @@ export default function LoginPage() {
       if (mode === "signup") {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(), password,
-          options: { data: { display_name: displayName.trim() || "New Friend" }, emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: {
+            data: { display_name: displayName.trim() || "New Friend" },
+            emailRedirectTo: new URL(
+              "/auth/callback",
+              process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+            ).toString(),
+          },
         });
         if (signUpError) throw signUpError;
         if (!data.session) setMessage("注册成功！请检查邮箱，点击确认链接后即可进入 Sonder。");
