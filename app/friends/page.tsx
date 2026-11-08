@@ -2,12 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import FollowButton from "@/components/follow-button";
+import { getLocale, t } from "@/lib/locale";
 
 export const dynamic = "force-dynamic";
 
 type Profile = { id: string; username: string | null; display_name: string; bio: string | null; avatar_url: string | null };
 
 export default async function FriendsPage() {
+  const locale = await getLocale();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/friends");
@@ -61,7 +63,7 @@ export default async function FriendsPage() {
   function peopleSection(title: string, description: string, people: Profile[], kind: "friend" | "following" | "follower") {
     return <section className="friends-section">
       <div className="friends-section-heading"><div><p className="eyebrow">✳ YOUR CIRCLE</p><h2>{title}</h2><p>{description}</p></div><span>{String(people.length).padStart(2, "0")}</span></div>
-      {people.length === 0 ? <div className="social-empty"><p>{kind === "friend" ? "当你们互相关注，就会在这里相遇。" : kind === "following" ? "还没有关注任何人。去日常广场认识一些新朋友吧。" : "还没有新的关注者，慢慢来。"}</p></div> :
+      {people.length === 0 ? <div className="social-empty"><p>{kind === "friend" ? t(locale,"当你们互相关注，就会在这里相遇。","When you follow each other, you will meet here.") : kind === "following" ? t(locale,"还没有关注任何人。去日常广场认识一些新朋友吧。","You are not following anyone yet. Meet someone in Explore.") : t(locale,"还没有新的关注者，慢慢来。","No followers yet. There is no rush.")}</p></div> :
         <div className="friends-grid">{people.map(person => <article className="friend-card" key={person.id}>
           <Link href={person.username ? "/u/" + person.username : "/friends"} className="friend-card-main">
             <span className="social-avatar">{person.avatar_url ? <img src={person.avatar_url} alt="" /> : person.display_name.slice(0,1)}</span>
@@ -74,18 +76,18 @@ export default async function FriendsPage() {
   }
 
   return <main className="journal-page">
-    <header className="journal-header"><Link href="/" className="auth-logo">sonder<span>.</span></Link><div className="journal-header-actions"><Link href="/journal" className="journal-quiet-link">我的日记</Link><Link href="/explore" className="journal-quiet-link">日常广场</Link><Link href="/settings/profile" className="journal-quiet-link">设置</Link></div></header>
+    <header className="journal-header"><Link href="/" className="auth-logo">sonder<span>.</span></Link><div className="journal-header-actions"><Link href="/journal" className="journal-quiet-link">{t(locale,"我的日记","My journal")}</Link><Link href="/explore" className="journal-quiet-link">{t(locale,"日常广场","Explore")}</Link><Link href="/settings/profile" className="journal-quiet-link">{t(locale,"设置","Settings")}</Link></div></header>
     <section className="social-page">
       <p className="eyebrow">✳ YOUR PEOPLE, YOUR LITTLE WORLD</p>
-      <div className="friends-hero"><div><h1>与你有关的人。</h1><p>{ownProfile?.display_name || "朋友"}，这里收藏着你在 Sonder 遇见的朋友与他们的日常。</p></div><Link href="/explore" className="journal-primary-button">去认识新朋友 ↗</Link></div>
-      <div className="friends-summary"><div><b>{friends.length}</b><span>好友 · 互相关注</span></div><div><b>{following.length}</b><span>正在关注</span></div><div><b>{followers.length}</b><span>关注者</span></div></div>
-      {peopleSection("我的好友。", "你们彼此关注，也彼此看见。", friends, "friend")}
-      {peopleSection("正在关注。", "你主动收藏的那些人。", following, "following")}
-      {peopleSection("关注着我。", "最近来到你生活里的朋友。", followers, "follower")}
-      <section className="friends-section"><div className="friends-section-heading"><div><p className="eyebrow">✳ FROM YOUR CIRCLE</p><h2>朋友的近况。</h2><p>来自你关注的人，愿意与你分享的日常。</p></div></div>
-        {feed.length === 0 ? <div className="social-empty"><p>这里还没有新的日常。关注一些朋友后，他们公开或对好友可见的日记会出现在这里。</p></div> :
+      <div className="friends-hero"><div><h1>{t(locale,"与你有关的人。","Your people.")}</h1><p>{ownProfile?.display_name || t(locale,"朋友","Friend")}，{t(locale,"这里收藏着你在 Sonder 遇见的朋友与他们的日常。","this is where you keep up with the people and moments you meet on Sonder.")}</p></div><Link href="/explore" className="journal-primary-button">{t(locale,"去认识新朋友 ↗","Meet new people ↗")}</Link></div>
+      <div className="friends-summary"><div><b>{friends.length}</b><span>{t(locale,"好友 · 互相关注","Friends · mutual follows")}</span></div><div><b>{following.length}</b><span>{t(locale,"正在关注","Following")}</span></div><div><b>{followers.length}</b><span>{t(locale,"关注者","Followers")}</span></div></div>
+      {peopleSection(t(locale,"我的好友。","My friends."), t(locale,"你们彼此关注，也彼此看见。","You follow each other and share a little of life."), friends, "friend")}
+      {peopleSection(t(locale,"正在关注。","Following."), t(locale,"你主动收藏的那些人。","People whose moments you have chosen to keep up with."), following, "following")}
+      {peopleSection(t(locale,"关注着我。","Following you."), t(locale,"最近来到你生活里的朋友。","People who have recently found their way to you."), followers, "follower")}
+      <section className="friends-section"><div className="friends-section-heading"><div><p className="eyebrow">✳ FROM YOUR CIRCLE</p><h2>{t(locale,"朋友的近况。","From your circle.")}</h2><p>{t(locale,"来自你关注的人，愿意与你分享的日常。","Everyday moments shared by the people you follow.")}</p></div></div>
+        {feed.length === 0 ? <div className="social-empty"><p>{t(locale,"这里还没有新的日常。关注一些朋友后，他们公开或对好友可见的日记会出现在这里。","Nothing new here yet. Follow a few people and their public or friends-only entries will appear here.")}</p></div> :
           <div className="social-feed">{feed.map(post => <article className="social-post" key={post.id}>
-            <div className="social-author"><Link className="social-author-link" href={post.profile?.username ? "/u/" + post.profile.username : "/friends"}><span className="social-avatar">{post.profile?.avatar_url ? <img src={post.profile.avatar_url} alt="" /> : (post.profile?.display_name || "友").slice(0,1)}</span><span><span className="social-author-name">{post.profile?.display_name || "一位朋友"}</span><span className="social-post-date">{new Date(post.created_at).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" })}</span></span></Link></div>
+            <div className="social-author"><Link className="social-author-link" href={post.profile?.username ? "/u/" + post.profile.username : "/friends"}><span className="social-avatar">{post.profile?.avatar_url ? <img src={post.profile.avatar_url} alt="" /> : (post.profile?.display_name || "友").slice(0,1)}</span><span><span className="social-author-name">{post.profile?.display_name || t(locale,"一位朋友","A friend")}</span><span className="social-post-date">{new Date(post.created_at).toLocaleDateString(locale==="en"?"en-US":"zh-CN", { year: "numeric", month: "long", day: "numeric" })}</span></span></Link></div>
             <h2>{post.title}</h2>{post.content && <p className="social-post-content">{post.content}</p>}{(post.mood || post.location) && <p className="social-post-meta">{[post.mood, post.location].filter(Boolean).join(" · ")}</p>}
             {post.photos.some(photo => photo.url) && <div className="journal-photo-grid">{post.photos.map(photo => photo.url ? <figure key={photo.id}><img src={photo.url} alt={photo.caption || post.title} /></figure> : null)}</div>}
           </article>)}</div>}
