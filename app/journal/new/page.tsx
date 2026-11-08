@@ -17,6 +17,8 @@ export default function NewJournalPage() {
   const [location,setLocation]=useState("");
   const [files,setFiles]=useState<File[]>([]);
   const [previews,setPreviews]=useState<string[]>([]);
+  useEffect(()=>{const urls=files.map(file=>URL.createObjectURL(file));setPreviews(urls);return ()=>urls.forEach(url=>URL.revokeObjectURL(url));},[files]);
+  const [previews,setPreviews]=useState<string[]>([]);
 
   useEffect(()=>{
     const urls=files.map(file=>URL.createObjectURL(file));

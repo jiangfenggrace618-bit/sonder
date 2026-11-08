@@ -44,3 +44,51 @@
 .visibility-option span{display:grid;gap:4px}.visibility-option b{font:12px var(--serif);font-weight:400}.visibility-option small{font:10px var(--serif);color:#898373}
 .editor-actions{display:flex;align-items:center;justify-content:space-between;padding-top:8px}
 @media(max-width:650px){.auth-page{padding:14px 18px 40px}.auth-card{margin-top:30px;padding:32px 24px}.journal-header{height:70px;padding:0 20px}.journal-content,.editor-content{width:calc(100% - 40px);padding-top:48px}.journal-welcome h1{font-size:44px}.journal-list-heading h2{font-size:29px}.journal-photo-grid,.upload-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.journal-form-two{grid-template-columns:1fr}.journal-entry-meta{gap:10px}.journal-entry h3{font-size:25px}.editor-actions{gap:14px}.journal-primary-button{padding:13px 15px}}
+
+.journal-entry-title-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.journal-entry-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.journal-entry-edit,.journal-entry-delete{border:1px solid var(--line);background:transparent;padding:7px 10px;color:#777165;font:9px var(--mono);cursor:pointer}
+.journal-entry-delete{color:#9b6459}
+.social-page{width:min(1000px,calc(100% - 48px));margin:0 auto;padding:60px 0 100px}
+.social-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:34px}
+.social-heading h1{font:clamp(42px,6vw,58px)/1.1 var(--serif);font-weight:400;letter-spacing:-.04em;margin:10px 0}
+.social-heading p{font:14px/1.8 var(--serif);color:#777165}
+.social-feed{display:grid;gap:20px}
+.social-post{background:#faf8f2;border:1px solid var(--line);padding:26px}
+.social-author{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+.social-author-link{display:flex;align-items:center;gap:12px;min-width:0}
+.social-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#e8e0d1;display:grid;place-items:center;font:16px var(--serif);color:var(--olive);overflow:hidden;flex-shrink:0}
+.social-author-name{font:12px var(--serif);display:block}
+.social-post-date{font:9px var(--mono);color:#898373;display:block;margin-top:5px}
+.follow-button{border:1px solid var(--olive);background:transparent;padding:8px 12px;color:var(--olive);font:9px var(--mono);cursor:pointer;white-space:nowrap}
+.follow-button.following{background:#eeece3;color:#5e624a}
+.social-post h2{font:28px var(--serif);font-weight:400;margin:0 0 12px}
+.social-post-content{font:14px/1.9 var(--serif);white-space:pre-wrap;color:#625e53}
+.social-post-meta{font:10px var(--mono);color:var(--olive);margin-top:14px}
+.social-empty{background:#faf8f2;border:1px solid var(--line);padding:48px;text-align:center}
+.social-empty h2{font:26px var(--serif);font-weight:400}.social-empty p{font:13px/1.8 var(--serif);color:#777165}
+.social-profile-hero{padding:34px;background:#e8e0d1;border:1px solid var(--line);margin-bottom:28px}
+.social-profile-top{display:flex;gap:22px;align-items:center}
+.social-profile-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;background:#f5f1e8;display:grid;place-items:center;font:30px var(--serif);color:var(--olive);overflow:hidden;flex-shrink:0}
+.social-profile-hero h1{font:42px var(--serif);font-weight:400;margin:0 0 8px}
+.social-profile-bio{font:13px/1.8 var(--serif);color:#625e53;max-width:650px;margin-top:20px;white-space:pre-wrap}
+.social-profile-stats{display:flex;gap:22px;margin-top:16px;font:9px var(--mono);color:#777165}
+.social-profile-stats b{color:var(--ink)}
+.guestbook-wall{display:grid;gap:12px}
+.guestbook-entry{padding:18px 20px;background:#faf8f2;border:1px solid var(--line)}
+.guestbook-entry-top{display:flex;justify-content:space-between;gap:12px;font:10px var(--mono);color:#898373}
+.guestbook-entry p{font:14px/1.8 var(--serif);white-space:pre-wrap;margin:12px 0 0}
+.guestbook-entry-delete{border:0;background:none;color:#9b6459;font:9px var(--mono);cursor:pointer}
+.guestbook-form{display:grid;gap:12px;margin:24px 0 36px}
+.guestbook-form textarea{width:100%;min-height:100px;border:1px solid var(--line);background:#fffdf8;padding:14px;font:14px/1.8 var(--serif);resize:vertical}
+.profile-settings{width:min(760px,calc(100% - 48px));margin:0 auto;padding:58px 0 100px}
+.profile-settings h1{font:48px var(--serif);font-weight:400}
+.profile-settings-form{display:grid;gap:20px}
+.profile-settings-form label{display:grid;gap:8px;font:11px var(--mono);color:#625e53}
+.profile-settings-form input,.profile-settings-form textarea,.profile-settings-form select{width:100%;border:1px solid var(--line);background:#fffdf8;padding:12px;font:14px var(--serif);color:var(--ink)}
+.profile-settings-form textarea{min-height:100px}
+.profile-image-preview{width:92px;height:92px;object-fit:cover;border-radius:50%;background:#e8e0d1}
+.profile-background-preview{width:100%;height:140px;object-fit:cover;background:#e8e0d1}
+.guestbook-login-note{font:12px var(--serif);color:#777165;margin:20px 0}
+.photo-remove{border:0;background:#eee8dc;color:#80665a;padding:6px 8px;font:9px var(--mono);cursor:pointer;margin-bottom:5px}
+@media(max-width:650px){.social-page{width:calc(100% - 40px);padding-top:42px}.social-post{padding:18px}.social-heading{align-items:start;flex-direction:column}.social-profile-hero{padding:22px}.social-profile-top{align-items:start}.social-profile-hero h1{font-size:32px}.social-profile-avatar{width:68px;height:68px}.journal-entry-title-row{align-items:start}.journal-entry-actions{gap:6px}.journal-entry-edit,.journal-entry-delete{padding:6px 7px}.profile-settings{width:calc(100% - 40px)}}
