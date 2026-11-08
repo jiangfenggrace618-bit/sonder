@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/use-locale";
 
 type Language = "zh" | "en";
 
@@ -52,18 +52,7 @@ const copy = {
 };
 
 export default function Home() {
-  const [language, setLanguage] = useState<Language>("zh");
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("sonder-language");
-    if (saved === "zh" || saved === "en") setLanguage(saved);
-  }, []);
-
-  function changeLanguage(next: Language) {
-    setLanguage(next);
-    window.localStorage.setItem("sonder-language", next);
-  }
-
+  const language = useLocale();
   const t = copy[language];
 
   return (
@@ -71,14 +60,9 @@ export default function Home() {
       <div className="topline"><span>{t.archive}</span><span>{t.made}</span></div>
       <header className="nav wrap">
         <a className="logo" href="#">sonder<span>.</span></a>
-        <nav><a href="#journal">{t.journal}</a><a href="#about">{t.about}</a><a href="#guestbook">{t.guestbook}</a></nav>
+        <nav><a href="/explore">{t.journal}</a><a href="#about">{t.about}</a><a href="/guestbook">{t.guestbook}</a></nav>
         <div className="nav-actions">
-          <div className="language-toggle" aria-label="选择语言 / Choose language">
-            <button className={language === "zh" ? "active" : ""} onClick={() => changeLanguage("zh")} aria-pressed={language === "zh"}>中文</button>
-            <span>/</span>
-            <button className={language === "en" ? "active" : ""} onClick={() => changeLanguage("en")} aria-pressed={language === "en"}>EN</button>
-          </div>
-          <a className="note" href="#guestbook">{t.leaveNote}</a>
+          <a className="note" href="/login">{language === "zh" ? "进入日记 ↗" : "MY JOURNAL ↗"}</a>
         </div>
       </header>
       <section className="hero wrap">
@@ -98,7 +82,7 @@ export default function Home() {
         <div className="cards">{t.entries.map(([date, title, desc, tag, tone, art], i) => <article key={title}><div className={"picture " + tone}><b>0{i + 1}</b><span>{art}</span>✳</div><small>{date}　·　{tag}</small><h3>{title}</h3><p>{desc}</p><a href="#guestbook">{t.read}</a></article>)}</div>
       </section>
       <section className="quote" id="about"><p className="eyebrow">{t.quoteLabel}</p><blockquote>{language === "zh" ? <>{t.quoteA}<br/>{t.quoteB} <em>{t.quoteC}</em></> : <>There is beauty in the ordinary.<br/>We just have to <em>notice.</em></>}</blockquote><small>{t.reminder}</small></section>
-      <section className="guest wrap" id="guestbook"><div><p className="eyebrow">{t.before}</p><h2>{t.leaveA}<br/><em>{t.leaveB}</em></h2></div><div><p>{t.thanks}</p><a className="button dark" href="mailto:hello@sonder.place">{t.hello}</a></div></section>
+      <section className="guest wrap" id="guestbook"><div><p className="eyebrow">{t.before}</p><h2>{t.leaveA}<br/><em>{t.leaveB}</em></h2></div><div><p>{t.thanks}</p><a className="button dark" href="/guestbook">{t.hello}</a></div></section>
       <footer className="wrap footer"><a className="logo" href="#">sonder<span>.</span></a><small>{t.footer}</small><small>{t.madeSlowly}</small></footer>
     </main>
   );
