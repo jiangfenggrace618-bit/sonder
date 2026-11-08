@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import FollowButton from "@/components/follow-button";
 import GuestbookWall from "@/components/guestbook-wall";
-import { getLocale, t } from "@/lib/locale";
+import { getLocale } from "@/lib/server-locale";
+import { t } from "@/lib/locale";
 
 export const dynamic="force-dynamic";
 
