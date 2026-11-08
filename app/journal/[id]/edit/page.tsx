@@ -100,7 +100,7 @@ export default function EditJournalPage(){
         {previews.length>0&&<div className="upload-preview-grid">{previews.map((url,index)=><figure key={url}><img src={url} alt={files[index].name}/></figure>)}</div>}
         <fieldset className="visibility-field"><legend>{t(locale,"谁可以看见这篇日记？","Who can see this entry?")}</legend>
           <label className={visibility==="public"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="public"} onChange={()=>setVisibility("public")}/><span><b>{t(locale,"公开","Public")}</b><small>{t(locale,"所有人都可以看见","Visible to everyone")}</small></span></label>
-          <label className={visibility==="followers"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="followers"} onChange={()=>setVisibility("followers")}/><span><b>{t(locale,"仅好友","Followers")}</b><small>{t(locale,"关注你的人可以看见","Visible to people who follow you")}</small></span></label>
+          <label className={visibility==="followers"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="followers"} onChange={()=>setVisibility("followers")}/><span><b>{t(locale,"关注者可见","Followers")}</b><small>{t(locale,"关注你的人可以看见","Visible to your followers")}</small></span></label>
           <label className={visibility==="private"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="private"} onChange={()=>setVisibility("private")}/><span><b>{t(locale,"仅自己","Only me")}</b><small>{t(locale,"只有你自己可以看见","Visible only to you")}</small></span></label>
         </fieldset>
         {error&&<p className="form-error" role="alert">{error}</p>}
