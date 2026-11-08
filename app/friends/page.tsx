@@ -71,7 +71,7 @@ export default async function FriendsPage() {
             <span><b>{person.display_name}</b><small>@{person.username || "sonder-friend"}</small>{person.bio && <em>{person.bio}</em>}</span>
           </Link>
           {kind !== "friend" && <FollowButton targetUserId={person.id} viewerId={viewerId} initialFollowing={followingIds.includes(person.id)} />}
-          {kind === "friend" && <span className="friend-mutual-label">✳ 互相关注</span>}
+          {kind === "friend" && <span className="friend-mutual-label">{t(locale,"✳ 互相关注","✳ Mutual follows")}</span>}
         </article>)}</div>}
     </section>;
   }
@@ -88,7 +88,7 @@ export default async function FriendsPage() {
       <section className="friends-section"><div className="friends-section-heading"><div><p className="eyebrow">✳ FROM YOUR CIRCLE</p><h2>{t(locale,"朋友的近况。","From your circle.")}</h2><p>{t(locale,"来自你关注的人，愿意与你分享的日常。","Everyday moments shared by the people you follow.")}</p></div></div>
         {feed.length === 0 ? <div className="social-empty"><p>{t(locale,"这里还没有新的日常。关注一些朋友后，他们公开或对好友可见的日记会出现在这里。","Nothing new here yet. Follow a few people and their public or friends-only entries will appear here.")}</p></div> :
           <div className="social-feed">{feed.map(post => <article className="social-post" key={post.id}>
-            <div className="social-author"><Link className="social-author-link" href={post.profile?.username ? "/u/" + post.profile.username : "/friends"}><span className="social-avatar">{post.profile?.avatar_url ? <img src={post.profile.avatar_url} alt="" /> : (post.profile?.display_name || "友").slice(0,1)}</span><span><span className="social-author-name">{post.profile?.display_name || t(locale,"一位朋友","A friend")}</span><span className="social-post-date">{new Date(post.created_at).toLocaleDateString(locale==="en"?"en-US":"zh-CN", { year: "numeric", month: "long", day: "numeric" })}</span></span></Link></div>
+            <div className="social-author"><Link className="social-author-link" href={post.profile?.username ? "/u/" + post.profile.username : "/friends"}><span className="social-avatar">{post.profile?.avatar_url ? <img src={post.profile.avatar_url} alt="" /> : (post.profile?.display_name || (locale==="en"?"F":"友")).slice(0,1)}</span><span><span className="social-author-name">{post.profile?.display_name || t(locale,"一位朋友","A friend")}</span><span className="social-post-date">{new Date(post.created_at).toLocaleDateString(locale==="en"?"en-US":"zh-CN", { year: "numeric", month: "long", day: "numeric" })}</span></span></Link></div>
             <h2>{post.title}</h2>{post.content && <p className="social-post-content">{post.content}</p>}{(post.mood || post.location) && <p className="social-post-meta">{[post.mood, post.location].filter(Boolean).join(" · ")}</p>}
             {post.photos.some(photo => photo.url) && <div className="journal-photo-grid">{post.photos.map(photo => photo.url ? <figure key={photo.id}><img src={photo.url} alt={photo.caption || post.title} /></figure> : null)}</div>}
           </article>)}</div>}
