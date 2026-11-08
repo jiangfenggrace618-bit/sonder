@@ -11,6 +11,7 @@ export default async function FriendsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/friends");
+  const viewerId = user?.id ?? null;
 
   const [{ data: followingRows }, { data: followerRows }] = await Promise.all([
     supabase.from("follows").select("followed_id,created_at").eq("follower_id", user.id).order("created_at", { ascending: false }),
@@ -66,7 +67,7 @@ export default async function FriendsPage() {
             <span className="social-avatar">{person.avatar_url ? <img src={person.avatar_url} alt="" /> : person.display_name.slice(0,1)}</span>
             <span><b>{person.display_name}</b><small>@{person.username || "sonder-friend"}</small>{person.bio && <em>{person.bio}</em>}</span>
           </Link>
-          {kind !== "friend" && <FollowButton targetUserId={person.id} viewerId={user.id} initialFollowing={followingIds.includes(person.id)} />}
+          {kind !== "friend" && <FollowButton targetUserId={person.id} viewerId={viewerId} initialFollowing={followingIds.includes(person.id)} />}
           {kind === "friend" && <span className="friend-mutual-label">✳ 互相关注</span>}
         </article>)}</div>}
     </section>;
