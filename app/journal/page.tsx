@@ -12,7 +12,7 @@ export default async function JournalPage() {
   if (!user) redirect("/login?next=/journal");
 
   const [{ data: profile }, { data: posts, error }] = await Promise.all([
-    supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("display_name,username").eq("id", user.id).maybeSingle(),
     supabase.from("posts")
       .select("id,title,content,visibility,mood,location,created_at,post_photos(id,image_url,caption,sort_order)")
       .eq("user_id", user.id).order("created_at", { ascending: false }),
@@ -33,7 +33,7 @@ export default async function JournalPage() {
     <main className="journal-page">
       <header className="journal-header">
         <Link href="/" className="auth-logo">sonder<span>.</span></Link>
-        <div className="journal-header-actions"><span className="journal-user">{displayName}</span><LogoutButton/></div>
+        <div className="journal-header-actions"><Link href="/explore" className="journal-quiet-link">日常广场</Link>{profile?.username&&<Link href={"/u/"+profile.username} className="journal-quiet-link">我的主页</Link>}<Link href="/settings/profile" className="journal-quiet-link">设置</Link><span className="journal-user">{displayName}</span><LogoutButton/></div>
       </header>
       <section className="journal-content">
         <div className="journal-welcome">

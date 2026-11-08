@@ -18,11 +18,13 @@ export default async function ExplorePage() {
   const profileMap=new Map((profiles??[]).map(profile=>[profile.id,profile]));
   const followed=new Set((follows??[]).map(row=>row.followed_id));
   const cards=await Promise.all((posts??[]).map(async post=>{
+    const profile=profileMap.get(post.user_id);
+    const {data:avatar}=profile?.avatar_url?await supabase.storage.from("profile-media").createSignedUrl(profile.avatar_url,3600):{data:null};
     const photos=await Promise.all([...(post.post_photos??[])].sort((a,b)=>a.sort_order-b.sort_order).map(async photo=>{
       const {data}=await supabase.storage.from("post-photos").createSignedUrl(photo.image_url,3600);
       return {...photo,url:data?.signedUrl??null};
     }));
-    return {...post,profile:profileMap.get(post.user_id),photos};
+    return {...post,profile,avatarUrl:avatar?.signedUrl??null,photos};
   }));
   return <main className="journal-page">
     <header className="journal-header"><Link href="/" className="auth-logo">sonder<span>.</span></Link><div className="journal-header-actions"><Link href="/journal" className="journal-quiet-link">我的日记</Link>{user?<Link href="/settings/profile" className="journal-quiet-link">个人设置</Link>:<Link href="/login" className="journal-quiet-link">登录</Link>}</div></header>
@@ -34,7 +36,7 @@ export default async function ExplorePage() {
         const profile=post.profile;const name=profile?.display_name||"一位朋友";
         return <article className="social-post" key={post.id}>
           <div className="social-author"><Link className="social-author-link" href={profile?.username?"/u/"+profile.username:"/explore"}>
-            <span className="social-avatar">{name.slice(0,1)}</span><span><span className="social-author-name">{name}</span><span className="social-post-date">{new Date(post.created_at).toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric"})}</span></span>
+            <span className="social-avatar">{post.avatarUrl?<img src={post.avatarUrl} alt=""/>:name.slice(0,1)}</span><span><span className="social-author-name">{name}</span><span className="social-post-date">{new Date(post.created_at).toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric"})}</span></span>
           </Link>{user&&<FollowButton targetUserId={post.user_id} viewerId={user.id} initialFollowing={followed.has(post.user_id)}/>}</div>
           <h2>{post.title}</h2>{post.content&&<p className="social-post-content">{post.content}</p>}
           {(post.mood||post.location)&&<p className="social-post-meta">{[post.mood,post.location].filter(Boolean).join(" · ")}</p>}

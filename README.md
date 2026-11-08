@@ -6,17 +6,25 @@ A quiet archive of life, memories and moments.
 
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` to `.env.local`.
-3. Fill in the Supabase project URL and publishable key from Supabase Project Settings → API Keys.
+3. Add the Supabase project URL and publishable key. Never use the secret/service-role key in browser code.
 4. In Supabase Authentication → URL Configuration, add your local and production site URLs. Add `/auth/callback` to the allowed redirect URLs.
 5. Run `npm run dev`.
 
-## Journal MVP
+## Current MVP
 
-- Email/password sign-up and sign-in.
-- Email confirmation callback.
-- Personal journal entries with public, followers-only, or private visibility.
-- Up to 8 photos per entry, with a 10 MB per-photo limit.
-- Private Storage objects and signed image URLs.
-- Session refresh through Next.js middleware.
+- Email/password sign-up and sign-in with confirmation callback.
+- Personal journal create, read, edit and delete.
+- Up to 8 photos per entry, private Storage and signed image URLs.
+- Per-entry visibility: public, followers-only, private.
+- Public journal feed and follow/unfollow.
+- Public profiles with username, bio, avatar and custom background/theme.
+- Global and per-profile guestbooks.
+- Responsive layouts and Chinese-first interface.
 
-Never put a Supabase secret/service-role key in a `NEXT_PUBLIC_*` variable or in browser code. This app uses the publishable key with Row Level Security.
+The guestbook table and follow constraints are applied to the connected Supabase project. Keep the matching SQL migration in your database change history.
+
+## Security
+
+- RLS is enabled on all exposed application tables.
+- Never put a Supabase secret/service-role key in a `NEXT_PUBLIC_*` variable.
+- Use the publishable key with Row Level Security.
