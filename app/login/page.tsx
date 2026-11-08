@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resending, setResending] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -20,6 +21,31 @@ export default function LoginPage() {
     }
   }, []);
   const [error, setError] = useState("");
+
+  async function resendConfirmation() {
+    if (!email.trim()) {
+      setError("请先填写注册邮箱。");
+      return;
+    }
+    setResending(true);
+    setError("");
+    setMessage("");
+    try {
+      const supabase = createClient();
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const { error: resendError } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: new URL("/auth/callback", siteUrl).toString() },
+      });
+      if (resendError) throw resendError;
+      setMessage("确认邮件已重新发送，请检查邮箱收件箱和垃圾邮件。");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "邮件发送失败，请稍后重试。");
+    } finally {
+      setResending(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,6 +93,11 @@ export default function LoginPage() {
           <label><span>邮箱地址</span><input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label>
           <label><span>密码</span><input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={6} required value={password} onChange={e=>setPassword(e.target.value)} placeholder="至少 6 位"/></label>
           {error && <p className="form-error" role="alert">{error}</p>}
+          {error.toLowerCase().includes("email not confirmed") && (
+            <button className="auth-submit" type="button" onClick={resendConfirmation} disabled={resending}>
+              {resending ? "正在发送…" : "重新发送确认邮件"}
+            </button>
+          )}
           {message && <p className="form-success" role="status">{message}</p>}
           <button className="auth-submit" type="submit" disabled={busy}>{busy?"请稍候…":mode==="login"?"进入我的日记 ↗":"创建我的账户 ↗"}</button>
         </form>
