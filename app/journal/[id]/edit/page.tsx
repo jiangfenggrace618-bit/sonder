@@ -16,7 +16,7 @@ export default function EditJournalPage(){
   const [mood,setMood]=useState("");const [location,setLocation]=useState("");
   const [photos,setPhotos]=useState<Photo[]>([]);const [removed,setRemoved]=useState<string[]>([]);
   const [files,setFiles]=useState<File[]>([]);const [previews,setPreviews]=useState<string[]>([]);
-  const [busy,setBusy]=useState(false);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
+  const [busy,setBusy]=useState(false);const [saveStage,setSaveStage]=useState("");const [loading,setLoading]=useState(true);const [error,setError]=useState("");
 
   useEffect(()=>{
     const urls=files.map(file=>URL.createObjectURL(file));setPreviews(urls);
@@ -53,19 +53,20 @@ export default function EditJournalPage(){
 
   async function save(event:FormEvent<HTMLFormElement>){
     event.preventDefault();if(!title.trim()){setError("标题不能为空。");return;}
-    setBusy(true);setError("");const supabase=createClient();const uploaded:string[]=[];
+    setBusy(true);setSaveStage("正在保存日记内容…");setError("");const supabase=createClient();const uploaded:string[]=[];
     try{
       const {data:{user}}=await supabase.auth.getUser();if(!user)throw new Error("登录状态已失效，请重新登录。");
       const {error:updateError}=await supabase.from("posts").update({title:title.trim(),content:content.trim(),visibility,mood:mood.trim()||null,location:location.trim()||null,updated_at:new Date().toISOString()}).eq("id",id).eq("user_id",user.id);
       if(updateError)throw updateError;
       const newRows=[];
+      if(files.length)setSaveStage(`日记已更新，正在上传 ${files.length} 张新照片…`);
       for(const [index,file] of files.entries()){
         const ext=file.name.split(".").pop()?.toLowerCase()||"jpg";const path=`${user.id}/${id}/${crypto.randomUUID()}.${ext}`;
         const {error:uploadError}=await supabase.storage.from("post-photos").upload(path,file,{contentType:file.type,upsert:false});
         if(uploadError)throw uploadError;uploaded.push(path);
         newRows.push({post_id:id,user_id:user.id,image_url:path,caption:"",sort_order:photos.length+index});
       }
-      if(newRows.length){const {error:insertError}=await supabase.from("post_photos").insert(newRows);if(insertError)throw insertError;}
+      if(newRows.length){setSaveStage("照片已上传，正在完成保存…");const {error:insertError}=await supabase.from("post_photos").insert(newRows);if(insertError)throw insertError;}
       const removedPhotos=photos.filter(photo=>removed.includes(photo.id));
       if(removedPhotos.length){
         const {error:deleteRowsError}=await supabase.from("post_photos").delete().in("id",removed);
@@ -73,10 +74,12 @@ export default function EditJournalPage(){
         const {error:deleteFilesError}=await supabase.storage.from("post-photos").remove(removedPhotos.map(photo=>photo.image_url));
         if(deleteFilesError)throw deleteFilesError;
       }
-      router.push("/journal");router.refresh();
+      setSaveStage("保存成功，正在返回日记列表…");
+      window.location.assign("/journal");
     }catch(caught){
       if(uploaded.length)await supabase.storage.from("post-photos").remove(uploaded);
       setError(caught instanceof Error?caught.message:"保存失败，请稍后重试。");
+      setSaveStage("");
     }finally{setBusy(false);}
   }
 
@@ -96,8 +99,9 @@ export default function EditJournalPage(){
           <label className={visibility==="followers"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="followers"} onChange={()=>setVisibility("followers")}/><span><b>仅好友</b><small>关注你的人可以看见</small></span></label>
           <label className={visibility==="private"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="private"} onChange={()=>setVisibility("private")}/><span><b>仅自己</b><small>只有你自己可以看见</small></span></label>
         </fieldset>
-        {error&&<p className="form-error">{error}</p>}
-        <div className="editor-actions"><Link href="/journal" className="journal-quiet-link">取消</Link><button className="journal-primary-button" disabled={busy}>{busy?"正在保存…":"保存修改 ↗"}</button></div>
+        {error&&<p className="form-error" role="alert">{error}</p>}
+        {busy&&saveStage&&<p className="editor-save-status" role="status" aria-live="polite">{saveStage}</p>}
+        <div className="editor-actions"><Link href="/journal" className="journal-quiet-link">取消</Link><button className="journal-primary-button" disabled={busy}>{busy?(saveStage||"正在保存…"):"保存修改 ↗"}</button></div>
       </form>
     </section>
   </main>;
