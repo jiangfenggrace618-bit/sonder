@@ -9,6 +9,7 @@ export default async function ExplorePage() {
   const {data:{user}}=await supabase.auth.getUser();
   const {data:posts,error}=await supabase.from("posts")
     .select("id,user_id,title,content,visibility,mood,location,created_at,post_photos(id,image_url,caption,sort_order)")
+    .eq("visibility","public")
     .order("created_at",{ascending:false}).limit(50);
   const userIds=[...new Set((posts??[]).map(post=>post.user_id))];
   const [{data:profiles},{data:follows}]=await Promise.all([
