@@ -16,7 +16,7 @@ export default async function GuestbookPage() {
   const authorIds=[...new Set((rows??[]).map(row=>row.author_id))];
   const {data:profiles}=authorIds.length?await supabase.from("profiles").select("id,display_name").in("id",authorIds):{data:[]};
   const names=new Map((profiles??[]).map(profile=>[profile.id,profile.display_name]));
-  const entries=(rows??[]).map(row=>({...row,author_name:names.get(row.author_id)||"一位朋友"}));
+  const entries=(rows??[]).map(row=>({...row,author_name:names.get(row.author_id)||t(locale,"一位朋友","A friend")}));
   const {data:viewerProfile}=user?await supabase.from("profiles").select("display_name").eq("id",user.id).maybeSingle():{data:null};
   return <main className="journal-page">
     <header className="journal-header"><Link href="/" className="auth-logo">sonder<span>.</span></Link><Link href="/explore" className="journal-quiet-link">{t(locale,"去看看日常 ↗","Explore the journal ↗")}</Link></header>
