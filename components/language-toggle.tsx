@@ -10,7 +10,8 @@ export default function LanguageToggle({ initialLocale = "zh" }: { initialLocale
 
   useEffect(() => {
     const sync = () => {
-      const saved = window.localStorage.getItem("sonder-language") === "en" ? "en" : "zh";
+      const stored = window.localStorage.getItem("sonder-language");
+      const saved = stored === "en" || stored === "zh" ? stored : initialLocale;
       const current = document.cookie.split("; ").find(item => item.startsWith("sonder-language="))?.split("=")[1];
       setLocale(saved);
       if (current !== saved) {
