@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getLocale, t } from "@/lib/locale";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function JournalDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
   const supabase = await createClient();
   const {
     data: { user },
@@ -54,9 +56,9 @@ export default async function JournalDetailPage({
   );
 
   const visibilityLabel: Record<string, string> = {
-    public: "公开",
-    followers: "仅好友",
-    private: "仅自己",
+    public: t(locale,"公开","Public"),
+    followers: t(locale,"仅好友","Friends"),
+    private: t(locale,"仅自己","Private"),
   };
 
   return (
@@ -64,15 +66,15 @@ export default async function JournalDetailPage({
       <header className="journal-header">
         <Link href="/" className="auth-logo">sonder<span>.</span></Link>
         <div className="journal-header-actions">
-          <Link href="/journal" className="journal-quiet-link">← 返回我的日记</Link>
-          <Link href={`/journal/${id}/edit`} className="journal-entry-edit">编辑</Link>
+          <Link href="/journal" className="journal-quiet-link">{t(locale,"← 返回我的日记","← Back to my journal")}</Link>
+          <Link href={`/journal/${id}/edit`} className="journal-entry-edit">{t(locale,"编辑","Edit")}</Link>
         </div>
       </header>
 
       <article className="journal-detail-page">
         <div className="journal-entry-meta">
           <time dateTime={post.created_at}>
-            {new Date(post.created_at).toLocaleDateString("zh-CN", {
+            {new Date(post.created_at).toLocaleDateString(locale==="en"?"en-US":"zh-CN", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -105,7 +107,7 @@ export default async function JournalDetailPage({
                   />
                 ) : (
                   <div className="journal-detail-photo-error" role="status">
-                    图片暂时无法加载，请稍后刷新
+                    {t(locale,"图片暂时无法加载，请稍后刷新","This photo could not be loaded. Please refresh.")}
                   </div>
                 )}
                 {photo.caption && <figcaption>{photo.caption}</figcaption>}
@@ -115,7 +117,7 @@ export default async function JournalDetailPage({
         )}
 
         {photosError && (
-          <p className="form-error">照片信息读取失败：{photosError.message}</p>
+          <p className="form-error">{t(locale,"照片信息读取失败：","Could not load photo details: ")}{photosError.message}</p>
         )}
       </article>
     </main>
