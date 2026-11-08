@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import ExportBackupButton from "@/components/export-backup-button";
 
 const themes=["vintage-paper","linen","sage","rose","night","floral","custom"];
 const accepted=["image/jpeg","image/png","image/webp","image/gif","image/heic","image/heif"];
@@ -99,6 +100,7 @@ export default function ProfileSettingsPage() {
         <div className="editor-actions"><Link href="/journal" className="journal-quiet-link">取消</Link><button className="journal-primary-button" disabled={busy}>{busy?"正在保存…":"保存主页 ↗"}</button></div>
         {username&&<Link href={"/u/"+username} className="journal-text-link">预览我的主页 ↗</Link>}
       </form>}
+      {!loading&&userId&&<ExportBackupButton userId={userId}/>}
     </section>
   </main>;
 }
