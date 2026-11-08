@@ -21,6 +21,7 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
   const [resending, setResending] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -45,6 +46,30 @@ export default function LoginPage() {
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t(locale,"邮件发送失败，请稍后重试。","Could not send the email. Please try again."));
     } finally { setResending(false); }
+  }
+
+  async function sendPasswordReset() {
+    if (!email.trim()) {
+      setError(t(locale,"请先填写注册邮箱。","Enter your account email first."));
+      return;
+    }
+    setResetting(true);
+    setError("");
+    setMessage("");
+    try {
+      const supabase = createClient();
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const callback = new URL("/auth/callback?next=/reset-password", siteUrl).toString();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: callback,
+      });
+      if (resetError) throw resetError;
+      setMessage(t(locale,"如果这个邮箱已注册，我们会发送一封密码重置邮件。请检查收件箱和垃圾邮件。","If this email is registered, a password reset link is on its way. Check your inbox and spam folder."));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : t(locale,"暂时无法发送重置邮件，请稍后重试。","Could not send the reset email. Please try again."));
+    } finally {
+      setResetting(false);
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -89,6 +114,7 @@ export default function LoginPage() {
           {mode === "signup" && <label><span>{t(locale,"怎么称呼你","What should we call you?")}</span><input value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder={t(locale,"你的昵称","Your name")} maxLength={40}/></label>}
           <label><span>{t(locale,"邮箱地址","Email address")}</span><input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label>
           <label><span>{t(locale,"密码","Password")}</span><input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={6} required value={password} onChange={e=>setPassword(e.target.value)} placeholder={t(locale,"至少 6 位","At least 6 characters")}/></label>
+          {mode === "login" && <button className="auth-text-button" type="button" onClick={sendPasswordReset} disabled={resetting}>{resetting ? t(locale,"正在发送…","Sending…") : t(locale,"忘记密码？","Forgot password?")}</button>}
           {error && <p className="form-error" role="alert">{error}</p>}
           {error.toLowerCase().includes("email not confirmed") && <button className="auth-submit" type="button" onClick={resendConfirmation} disabled={resending}>{resending ? t(locale,"正在发送…","Sending…") : t(locale,"重新发送确认邮件","Resend confirmation email")}</button>}
           {message && <p className="form-success" role="status">{message}</p>}
