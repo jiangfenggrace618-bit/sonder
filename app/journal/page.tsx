@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./logout-button";
 import DeletePostButton from "@/components/delete-post-button";
+import { getLocale, t } from "@/lib/locale";
 
 export const dynamic = "force-dynamic";
 
 export default async function JournalPage() {
+  const locale = await getLocale();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/journal");
@@ -27,24 +29,24 @@ export default async function JournalPage() {
   }));
 
   const displayName = profile?.display_name || user.email?.split("@")[0] || "朋友";
-  const visibilityLabel: Record<string,string> = {public:"公开",followers:"仅好友",private:"仅自己"};
+  const visibilityLabel: Record<string,string> = {public:t(locale,"公开","Public"),followers:t(locale,"仅好友","Friends"),private:t(locale,"仅自己","Private")};
 
   return (
     <main className="journal-page">
       <header className="journal-header">
         <Link href="/" className="auth-logo">sonder<span>.</span></Link>
-        <div className="journal-header-actions"><Link href="/explore" className="journal-quiet-link">日常广场</Link><Link href="/friends" className="journal-quiet-link">好友</Link>{profile?.username&&<Link href={"/u/"+profile.username} className="journal-quiet-link">我的主页</Link>}<Link href="/settings/profile" className="journal-quiet-link">设置</Link><span className="journal-user">{displayName}</span><LogoutButton/></div>
+        <div className="journal-header-actions"><Link href="/explore" className="journal-quiet-link">{t(locale,"日常广场","Explore")}</Link><Link href="/friends" className="journal-quiet-link">{t(locale,"好友","Friends")}</Link>{profile?.username&&<Link href={"/u/"+profile.username} className="journal-quiet-link">{t(locale,"我的主页","My profile")}</Link>}<Link href="/settings/profile" className="journal-quiet-link">{t(locale,"设置","Settings")}</Link><span className="journal-user">{displayName}</span><LogoutButton/></div>
       </header>
       <section className="journal-content">
         <div className="journal-welcome">
-          <p className="eyebrow">✳ YOUR PERSONAL ARCHIVE</p><h1>你好，{displayName}。</h1>
-          <p>每一天都值得被温柔地收藏。</p><Link href="/journal/new" className="journal-primary-button">写一篇日记 ↗</Link>
+          <p className="eyebrow">✳ YOUR PERSONAL ARCHIVE</p><h1>{locale==="en"?"Hello, ":"你好，"}{displayName}{locale==="en"?".":"。"}</h1>
+          <p>{t(locale,"每一天都值得被温柔地收藏。","Every day deserves a gentle place to be kept.")}</p><Link href="/journal/new" className="journal-primary-button">{t(locale,"写一篇日记 ↗","Write a journal ↗")}</Link>
         </div>
-        <div className="journal-list-heading"><div><p className="eyebrow">THE JOURNAL</p><h2>你的日常记录。</h2></div><span>{String(entries.length).padStart(2,"0")} ENTRIES</span></div>
+        <div className="journal-list-heading"><div><p className="eyebrow">THE JOURNAL</p><h2>{t(locale,"你的日常记录。","Your journal.")}</h2></div><span>{String(entries.length).padStart(2,"0")} ENTRIES</span></div>
         {error && <p className="form-error">暂时无法读取日记：{error.message}</p>}
-        {entries.length===0 ? <div className="journal-empty"><span>✳</span><h3>这里还很安静。</h3><p>写下第一篇日记，让这个小小的收藏簿慢慢丰富起来。</p><Link href="/journal/new" className="journal-text-link">写下第一篇 ↗</Link></div> :
+        {entries.length===0 ? <div className="journal-empty"><span>✳</span><h3>{t(locale,"这里还很安静。","It is quiet here for now.")}</h3><p>{t(locale,"写下第一篇日记，让这个小小的收藏簿慢慢丰富起来。","Write your first entry and let this little archive grow.")}</p><Link href="/journal/new" className="journal-text-link">{t(locale,"写下第一篇 ↗","Write your first entry ↗")}</Link></div> :
           <div className="journal-entry-list">{entries.map(entry=><article className="journal-entry" key={entry.id}>
-            <div className="journal-entry-meta"><time dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric"})}</time><span>{visibilityLabel[entry.visibility]??entry.visibility}</span></div>
+            <div className="journal-entry-meta"><time dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleDateString(locale==="en"?"en-US":"zh-CN",{year:"numeric",month:"long",day:"numeric"})}</time><span>{visibilityLabel[entry.visibility]??entry.visibility}</span></div>
             <div className="journal-entry-title-row"><h3>{entry.title}</h3><div className="journal-entry-actions"><Link href={`/journal/${entry.id}/edit`} className="journal-entry-edit">编辑</Link><DeletePostButton postId={entry.id}/></div></div>{entry.content&&<p className="journal-entry-content">{entry.content}</p>}
             {(entry.mood||entry.location)&&<p className="journal-entry-extra">{[entry.mood,entry.location].filter(Boolean).join(" · ")}</p>}
             {entry.photos.length>0&&<div className="journal-photo-grid">{entry.photos.map(photo=>photo.signedUrl?<figure key={photo.id}><img src={photo.signedUrl} alt={photo.caption||entry.title}/>{photo.caption&&<figcaption>{photo.caption}</figcaption>}</figure>:null)}</div>}
