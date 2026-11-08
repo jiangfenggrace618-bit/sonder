@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import GuestbookWall from "@/components/guestbook-wall";
-import { getLocale, t } from "@/lib/locale";
+import { getLocale } from "@/lib/server-locale";
+import { t } from "@/lib/locale";
 
 export const dynamic="force-dynamic";
 
