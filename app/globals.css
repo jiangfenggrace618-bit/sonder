@@ -147,3 +147,12 @@
 .friend-card-main small,.friend-card-main em{font:10px var(--mono);color:#898373;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
 .friend-mutual-label{font:9px var(--mono);color:var(--olive);white-space:nowrap}
 @media(max-width:650px){.friends-hero{align-items:start;flex-direction:column}.friends-summary>div{padding:16px 10px}.friends-summary b{font-size:26px}.friends-summary span{font-size:8px}.friends-grid{grid-template-columns:1fr}.friends-section-heading h2{font-size:27px}.friend-card{padding:13px}.friend-card-main small,.friend-card-main em{max-width:160px}}
+
+
+/* Personal data export */
+.backup-panel{display:grid;gap:16px;margin-top:42px;padding:24px;background:#faf8f2;border:1px solid var(--line)}
+.backup-panel h2{font:25px var(--serif);font-weight:400;margin:0 0 8px}
+.backup-panel p{font:13px/1.8 var(--serif);color:#777165;margin:0}
+.backup-panel small{display:block;margin-top:8px;font:10px/1.7 var(--mono);color:#898373}
+.backup-panel .journal-primary-button{justify-self:start}
+@media(max-width:650px){.backup-panel{padding:18px}}
