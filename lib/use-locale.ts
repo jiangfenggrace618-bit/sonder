@@ -8,7 +8,9 @@ export function useLocale(): Locale {
 
   useEffect(() => {
     const sync = () => {
-      setLocale(window.localStorage.getItem("sonder-language") === "en" ? "en" : "zh");
+      const stored = window.localStorage.getItem("sonder-language");
+      const cookie = document.cookie.split("; ").find(item => item.startsWith("sonder-language="))?.split("=")[1];
+      setLocale(stored === "en" || stored === "zh" ? stored : cookie === "en" ? "en" : "zh");
     };
     sync();
     window.addEventListener("sonder-language-change", sync);
