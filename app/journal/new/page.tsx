@@ -61,8 +61,9 @@ export default function NewJournalPage() {
         photoRows.push({post_id:post.id,user_id:user.id,image_url:path,caption:"",sort_order:index});
       }
       if(photoRows.length){setSaveStage("照片已上传，正在完成保存…");const {error:photoError}=await supabase.from("post_photos").insert(photoRows);if(photoError)throw photoError;}
-      setSaveStage("保存成功，正在返回日记列表…");
-      window.location.assign("/journal");
+      setSaveStage("保存成功，正在打开你的日记…");
+      router.replace("/journal");
+      router.refresh();
     } catch(caught) {
       if(uploaded.length)await supabase.storage.from("post-photos").remove(uploaded);
       if(postId){await supabase.from("post_photos").delete().eq("post_id",postId);await supabase.from("posts").delete().eq("id",postId);}
