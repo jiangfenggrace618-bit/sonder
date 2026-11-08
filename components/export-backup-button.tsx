@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLocale } from "@/lib/use-locale";
-import { t } from "@/lib/locale";
+import { t, type Locale } from "@/lib/locale";
 
 type PhotoRow = {
   id: string;
@@ -17,9 +17,10 @@ async function fileAsDataUrl(
   supabase: ReturnType<typeof createClient>,
   bucket: "post-photos" | "profile-media",
   path: string,
+  locale: Locale,
 ) {
   const { data, error } = await supabase.storage.from(bucket).download(path);
-  if (error) throw new Error(locale==="en"?`Could not back up image (${path}): ${error.message}`:`备份图片失败（${path}）：${error.message}`);
+  if (error) throw new Error(t(locale,`备份图片失败（${path}）：${error.message}`,`Could not back up image (${path}): ${error.message}`));
 
   const bytes = new Uint8Array(await data.arrayBuffer());
   let binary = "";
@@ -88,7 +89,7 @@ export default function ExportBackupButton({ userId }: { userId: string }) {
       async function addFile(bucket: "post-photos" | "profile-media", path: string) {
         completedFiles += 1;
         setStatus(locale==="en"?`Backing up photos and profile images (${completedFiles}/${totalFiles})…`:`正在备份照片和主页图片（${completedFiles}/${totalFiles}）…`);
-        files.push(await fileAsDataUrl(supabase, bucket, path));
+        files.push(await fileAsDataUrl(supabase, bucket, path, locale));
       }
 
       for (const photo of allPhotoRows) {
