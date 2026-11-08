@@ -264,7 +264,8 @@ export default function ExportBackupButton({ userId }: { userId: string }) {
         ...storedFiles.map(file => ({ name: file.archivePath, bytes: file.bytes })),
       ];
       const zipBytes = createZip(archiveEntries);
-      const blob = new Blob([zipBytes], { type: "application/zip" });
+      const zipBuffer = zipBytes.buffer.slice(zipBytes.byteOffset, zipBytes.byteOffset + zipBytes.byteLength) as ArrayBuffer;
+      const blob = new Blob([zipBuffer], { type: "application/zip" });
       const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = objectUrl;
