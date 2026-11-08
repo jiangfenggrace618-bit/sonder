@@ -23,6 +23,7 @@ export default function NewJournalPage() {
     return ()=>urls.forEach(url=>URL.revokeObjectURL(url));
   },[files]);
   const [busy,setBusy]=useState(false);
+  const [saveStage,setSaveStage]=useState("");
   const [error,setError]=useState("");
 
   function chooseFiles(list:FileList|null) {
@@ -36,7 +37,7 @@ export default function NewJournalPage() {
   async function handleSubmit(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if(!title.trim()){setError("先为这篇日记写一个标题吧。");return;}
-    setBusy(true);setError("");
+    setBusy(true);setSaveStage("正在保存日记内容…");setError("");
     const supabase=createClient();
     const uploaded:string[]=[];
     let postId:string|null=null;
@@ -50,6 +51,7 @@ export default function NewJournalPage() {
       if(postError)throw postError;
       postId=post.id;
       const photoRows=[];
+      if(files.length)setSaveStage(`日记已保存，正在上传 ${files.length} 张照片…`);
       for(const [index,file] of files.entries()){
         const ext=file.name.includes(".")?file.name.split(".").pop()!.toLowerCase():(file.type.split("/")[1]||"jpg");
         const path=`${user.id}/${post.id}/${crypto.randomUUID()}.${ext}`;
@@ -58,12 +60,14 @@ export default function NewJournalPage() {
         uploaded.push(path);
         photoRows.push({post_id:post.id,user_id:user.id,image_url:path,caption:"",sort_order:index});
       }
-      if(photoRows.length){const {error:photoError}=await supabase.from("post_photos").insert(photoRows);if(photoError)throw photoError;}
-      router.push("/journal");router.refresh();
+      if(photoRows.length){setSaveStage("照片已上传，正在完成保存…");const {error:photoError}=await supabase.from("post_photos").insert(photoRows);if(photoError)throw photoError;}
+      setSaveStage("保存成功，正在返回日记列表…");
+      window.location.assign("/journal");
     } catch(caught) {
       if(uploaded.length)await supabase.storage.from("post-photos").remove(uploaded);
       if(postId){await supabase.from("post_photos").delete().eq("post_id",postId);await supabase.from("posts").delete().eq("id",postId);}
       setError(caught instanceof Error?caught.message:"保存失败，请稍后重试。");
+      setSaveStage("");
     } finally {setBusy(false);}
   }
 
@@ -86,7 +90,8 @@ export default function NewJournalPage() {
           <label className={visibility==="private"?"visibility-option chosen":"visibility-option"}><input type="radio" name="visibility" checked={visibility==="private"} onChange={()=>setVisibility("private")}/><span><b>仅自己</b><small>只有你自己可以看见</small></span></label>
         </fieldset>
         {error&&<p className="form-error" role="alert">{error}</p>}
-        <div className="editor-actions"><Link href="/journal" className="journal-quiet-link">暂不保存</Link><button type="submit" className="journal-primary-button" disabled={busy}>{busy?"正在收藏…":"收藏这篇日记 ↗"}</button></div>
+        {busy&&saveStage&&<p className="editor-save-status" role="status" aria-live="polite">{saveStage}</p>}
+        <div className="editor-actions"><Link href="/journal" className="journal-quiet-link">暂不保存</Link><button type="submit" className="journal-primary-button" disabled={busy}>{busy?(saveStage||"正在收藏…"):"收藏这篇日记 ↗"}</button></div>
       </form>
     </section>
   </main>;
