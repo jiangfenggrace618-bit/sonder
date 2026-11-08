@@ -11,13 +11,17 @@ export default function LanguageToggle({ initialLocale = "zh" }: { initialLocale
   useEffect(() => {
     const sync = () => {
       const saved = window.localStorage.getItem("sonder-language") === "en" ? "en" : "zh";
+      const current = document.cookie.split("; ").find(item => item.startsWith("sonder-language="))?.split("=")[1];
       setLocale(saved);
-      document.cookie = `sonder-language=${saved}; path=/; max-age=31536000; samesite=lax`;
+      if (current !== saved) {
+        document.cookie = `sonder-language=${saved}; path=/; max-age=31536000; samesite=lax`;
+        router.refresh();
+      }
     };
     sync();
     window.addEventListener("sonder-language-change", sync);
     return () => window.removeEventListener("sonder-language-change", sync);
-  }, []);
+  }, [router]);
 
   function change(next: Locale) {
     window.localStorage.setItem("sonder-language", next);
