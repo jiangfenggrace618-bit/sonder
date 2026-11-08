@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function getSafeNextPath() {\n  const candidate = new URLSearchParams(window.location.search).get("next");\n  return candidate && candidate.startsWith("/") && !candidate.startsWith("//") ? candidate : "/journal";\n}\n\nexport default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -36,7 +36,7 @@ export default function LoginPage() {
       const { error: resendError } = await supabase.auth.resend({
         type: "signup",
         email: email.trim(),
-        options: { emailRedirectTo: new URL("/auth/callback", siteUrl).toString() },
+        options: { emailRedirectTo: new URL(`/auth/callback?next=${encodeURIComponent(getSafeNextPath())}`, siteUrl).toString() },
       });
       if (resendError) throw resendError;
       setMessage("确认邮件已重新发送，请检查邮箱收件箱和垃圾邮件。");
@@ -65,11 +65,11 @@ export default function LoginPage() {
         });
         if (signUpError) throw signUpError;
         if (!data.session) setMessage("注册成功！请检查邮箱，点击确认链接后即可进入 Sonder。");
-        else { router.push("/journal"); router.refresh(); }
+        else { router.push(nextPath); router.refresh(); }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (signInError) throw signInError;
-        router.push("/journal"); router.refresh();
+        router.push(nextPath); router.refresh();
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "操作失败，请稍后重试。");
