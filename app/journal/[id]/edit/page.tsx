@@ -74,8 +74,9 @@ export default function EditJournalPage(){
         const {error:deleteFilesError}=await supabase.storage.from("post-photos").remove(removedPhotos.map(photo=>photo.image_url));
         if(deleteFilesError)throw deleteFilesError;
       }
-      setSaveStage("保存成功，正在返回日记列表…");
-      window.location.assign("/journal");
+      setSaveStage("保存成功，正在打开这篇日记…");
+      router.replace(`/journal/${id}`);
+      router.refresh();
     }catch(caught){
       if(uploaded.length)await supabase.storage.from("post-photos").remove(uploaded);
       setError(caught instanceof Error?caught.message:"保存失败，请稍后重试。");
