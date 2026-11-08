@@ -22,7 +22,7 @@ export default async function JournalDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect(`/login?next=/journal/${id}`);
+  if (!user) redirect(`/login?next=${encodeURIComponent(`/journal/${id}`)}`);
 
   const { data: post, error: postError } = await supabase
     .from("posts")
