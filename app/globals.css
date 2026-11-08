@@ -123,3 +123,27 @@
 .journal-detail-photo-grid figcaption{font:10px var(--mono);color:#898373;margin-top:8px}
 .journal-detail-photo-error{aspect-ratio:1/1;display:grid;place-items:center;padding:20px;background:#e8e0d1;color:#777165;text-align:center;font:13px var(--serif)}
 @media(max-width:650px){.journal-detail-page{width:calc(100% - 40px);padding-top:42px}.journal-detail-photo-grid{grid-template-columns:1fr;gap:16px}.journal-detail-title{font-size:42px;margin:22px 0 28px}.journal-detail-content{font-size:15px}}
+
+
+/* Friends hub */
+.friends-hero{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:12px 0 30px}
+.friends-hero h1{font:clamp(42px,6vw,58px)/1.1 var(--serif);font-weight:400;letter-spacing:-.04em;margin:10px 0}
+.friends-hero p{font:14px/1.8 var(--serif);color:#777165}
+.friends-summary{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid var(--line);margin:28px 0 54px}
+.friends-summary>div{padding:22px 18px;display:grid;gap:7px;border-right:1px solid var(--line)}
+.friends-summary>div:last-child{border-right:0}
+.friends-summary b{font:32px var(--serif);font-weight:400}
+.friends-summary span{font:10px var(--mono);color:#898373}
+.friends-section{margin:0 0 58px}
+.friends-section-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:20px}
+.friends-section-heading h2{font:32px var(--serif);font-weight:400;margin:8px 0}
+.friends-section-heading p{font:13px/1.8 var(--serif);color:#777165;margin:0}
+.friends-section-heading>span{font:12px var(--mono);color:#898373}
+.friends-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.friend-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;background:#faf8f2;border:1px solid var(--line);min-width:0}
+.friend-card-main{display:flex;align-items:center;gap:12px;min-width:0}
+.friend-card-main>span:last-child{display:grid;gap:4px;min-width:0}
+.friend-card-main b{font:14px var(--serif);font-weight:400}
+.friend-card-main small,.friend-card-main em{font:10px var(--mono);color:#898373;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.friend-mutual-label{font:9px var(--mono);color:var(--olive);white-space:nowrap}
+@media(max-width:650px){.friends-hero{align-items:start;flex-direction:column}.friends-summary>div{padding:16px 10px}.friends-summary b{font-size:26px}.friends-summary span{font-size:8px}.friends-grid{grid-template-columns:1fr}.friends-section-heading h2{font-size:27px}.friend-card{padding:13px}.friend-card-main small,.friend-card-main em{max-width:160px}}
