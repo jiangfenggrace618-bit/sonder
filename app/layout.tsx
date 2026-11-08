@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getLocale } from "@/lib/locale";
+import { getLocale } from "@/lib/server-locale";
 import LanguageToggle from "@/components/language-toggle";
 import "./globals.css";
 
