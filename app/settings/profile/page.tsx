@@ -46,9 +46,9 @@ export default function ProfileSettingsPage() {
       if(profile.background_url){const {data}=await supabase.storage.from("profile-media").createSignedUrl(profile.background_url,3600);if(alive)setBackgroundPreview(data?.signedUrl||"");}
       if(alive)setLoading(false);
     }
-    load().catch(e=>{if(alive){setError(e instanceof Error?e.message:t(locale,t(locale,"读取个人资料失败","Could not load your profile"),"Could not load your profile"));setLoading(false);}});
+    load().catch(e=>{if(alive){setError(e instanceof Error?e.message:t(locale,"读取个人资料失败","Could not load your profile"));setLoading(false);}});
     return ()=>{alive=false;};
-  },[router]);
+  },[router,locale]);
 
   function pick(file:File|null,kind:"avatar"|"background"){
     if(!file)return;
