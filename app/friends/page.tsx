@@ -29,7 +29,12 @@ export default async function FriendsPage() {
     supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
   ]);
 
-  const profileMap = new Map((profiles ?? []).map(profile => [profile.id, profile as Profile]));
+  const profilesWithAvatars = await Promise.all((profiles ?? []).map(async profile => {
+    if (!profile.avatar_url) return profile as Profile;
+    const { data } = await supabase.storage.from("profile-media").createSignedUrl(profile.avatar_url, 3600);
+    return { ...profile, avatar_url: data?.signedUrl ?? null } as Profile;
+  }));
+  const profileMap = new Map(profilesWithAvatars.map(profile => [profile.id, profile]));
   const following = followingIds.map(id => profileMap.get(id)).filter((p): p is Profile => !!p);
   const followers = followerIds.map(id => profileMap.get(id)).filter((p): p is Profile => !!p);
   const friends = [...mutualIds].map(id => profileMap.get(id)).filter((p): p is Profile => !!p);
