@@ -33,7 +33,7 @@ export default async function JournalPage() {
     <main className="journal-page">
       <header className="journal-header">
         <Link href="/" className="auth-logo">sonder<span>.</span></Link>
-        <div className="journal-header-actions"><Link href="/explore" className="journal-quiet-link">日常广场</Link>{profile?.username&&<Link href={"/u/"+profile.username} className="journal-quiet-link">我的主页</Link>}<Link href="/settings/profile" className="journal-quiet-link">设置</Link><span className="journal-user">{displayName}</span><LogoutButton/></div>
+        <div className="journal-header-actions"><Link href="/explore" className="journal-quiet-link">日常广场</Link><Link href="/friends" className="journal-quiet-link">好友</Link>{profile?.username&&<Link href={"/u/"+profile.username} className="journal-quiet-link">我的主页</Link>}<Link href="/settings/profile" className="journal-quiet-link">设置</Link><span className="journal-user">{displayName}</span><LogoutButton/></div>
       </header>
       <section className="journal-content">
         <div className="journal-welcome">
