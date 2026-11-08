@@ -1,12 +1,14 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 type Entry={id:string;profile_id:string|null;author_id:string;message:string;created_at:string;author_name:string};
 
 export default function GuestbookWall({initialEntries,profileId,viewerId,viewerName}:{initialEntries:Entry[];profileId:string|null;viewerId:string|null;viewerName:string}) {
+  const pathname=usePathname();
   const [entries,setEntries]=useState(initialEntries);
   const [message,setMessage]=useState("");
   const [busy,setBusy]=useState(false);
@@ -39,7 +41,7 @@ export default function GuestbookWall({initialEntries,profileId,viewerId,viewerN
     {viewerId?<form className="guestbook-form" onSubmit={submit}>
       <textarea value={message} onChange={e=>setMessage(e.target.value)} maxLength={1000} placeholder="写下一句话，给这里留一点温度…" required/>
       <div className="editor-actions"><small>{message.length}/1000</small><button className="journal-primary-button" type="submit" disabled={busy}>{busy?"正在发送…":"留下这句话 ↗"}</button></div>
-    </form>:<p className="guestbook-login-note"><Link href="/login">登录</Link> 后可以留下你的话。</p>}
+    </form>:<p className="guestbook-login-note"><Link href={`/login?next=${encodeURIComponent(pathname||"/guestbook")}`}>登录</Link> 后可以留下你的话。</p>}
     {error&&<p className="form-error">{error}</p>}
     {entries.length===0?<div className="journal-empty"><span>✳</span><h3>还没有留言。</h3><p>成为第一个留下话语的人吧。</p></div>:
       <div className="guestbook-wall">{entries.map(entry=><article className="guestbook-entry" key={entry.id}>
