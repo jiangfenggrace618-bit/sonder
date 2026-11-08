@@ -77,7 +77,7 @@ export default function EditJournalPage(){
         const {error:deleteFilesError}=await supabase.storage.from("post-photos").remove(removedPhotos.map(photo=>photo.image_url));
         if(deleteFilesError)throw deleteFilesError;
       }
-      setSaveStage(t(locale,"保存成功，{t(locale,"正在打开这篇日记…","Opening your entry…")}","Saved. Opening your entry…"));
+      setSaveStage(t(locale,"保存成功，正在打开这篇日记…","Saved. Opening your entry…"));
       router.replace(`/journal/${id}`);
       router.refresh();
     }catch(caught){
@@ -87,7 +87,7 @@ export default function EditJournalPage(){
     }finally{setBusy(false);}
   }
 
-  if(loading)return <main className="journal-page"><section className="editor-content">正在打开这篇日记…{error&&<p className="form-error">{error}</p>}</section></main>;
+  if(loading)return <main className="journal-page"><section className="editor-content">{t(locale,"正在打开这篇日记…","Opening your entry…")}{error&&<p className="form-error">{error}</p>}</section></main>;
   return <main className="journal-page">
     <header className="journal-header"><Link href="/" className="auth-logo">sonder<span>.</span></Link><Link href="/journal" className="journal-quiet-link">{t(locale,"← 返回我的日记","← Back to my journal")}</Link></header>
     <section className="editor-content"><p className="eyebrow">✳ REVISIT A MOMENT</p><h1>{t(locale,"重新整理。","Revisit a moment.")}</h1><p className="editor-intro">{t(locale,"有些记忆，值得再补充一点细节。","Some memories deserve a few more details.")}</p>
