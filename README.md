@@ -18,6 +18,7 @@ A quiet archive of life, memories and moments.
 - Per-entry visibility: public, followers-only, private.
 - Public journal feed and follow/unfollow.
 - Public profiles with username, bio, avatar and custom background/theme.
+- Personal JSON backup including journal text, photo files, profile media, follow relationships and guestbook entries.
 - Global and per-profile guestbooks.
 - Responsive layouts and Chinese-first interface.
 
